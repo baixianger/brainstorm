@@ -1,10 +1,11 @@
 # Jetson Xavier NX Setup Guide
 
 ## System Info
-- **Device:** Jetson Xavier NX
-- **RAM:** 8GB
+- **Device:** Jetson Xavier NX Developer Kit
+- **GPU:** GV11B (Volta, 384 CUDA cores, SM 7.2)
+- **RAM:** 8GB (shared CPU/GPU)
 - **Storage:** 238GB NVMe SSD + 30GB eMMC
-- **JetPack:** 5.x (R35 release)
+- **JetPack:** 5.1.3 (L4T 35.5.0)
 
 ## WiFi Configuration
 
@@ -82,14 +83,52 @@ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 2
 sudo update-alternatives --config python3
 ```
 
+**Note:** Don't remove Python 3.8 - it's required by system tools.
+
 ## jtop Installation
 
 ```bash
 sudo python3.9 -m pip install -U jetson-stats
-sudo systemctl restart jtop.service
+```
 
-# Run jtop
-sudo python3.9 -m jtop
+### Fix Missing Template Files
+
+If `jtop --install-service` fails with missing template errors:
+
+```bash
+# Create directories
+sudo mkdir -p /usr/local/lib/python3.9/dist-packages/scripts
+sudo mkdir -p /usr/local/lib/python3.9/dist-packages/services
+
+# Download missing files
+sudo wget -O /usr/local/lib/python3.9/dist-packages/scripts/jtop_env.sh \
+  https://raw.githubusercontent.com/rbonghi/jetson_stats/d49a1114be6d5893d7acf4e836330b0c408de800/scripts/jtop_env.sh
+
+sudo wget -O /usr/local/lib/python3.9/dist-packages/services/jtop.service \
+  https://raw.githubusercontent.com/rbonghi/jetson_stats/d49a1114be6d5893d7acf4e836330b0c408de800/services/jtop.service
+
+# Install service
+sudo jtop --install-service
+sudo reboot
+```
+
+### Run jtop
+
+```bash
+jtop
+```
+
+## Jetson Clocks (Performance Mode)
+
+```bash
+# Enable max performance (locks CPU/GPU at max frequency)
+sudo jetson_clocks
+
+# Check status
+sudo jetson_clocks --show
+
+# Restore dynamic scaling
+sudo jetson_clocks --restore
 ```
 
 ## llama.cpp Installation
@@ -100,10 +139,11 @@ sudo python3.9 -m jtop
 sudo apt update
 sudo apt install -y cmake build-essential
 
-# Upgrade cmake if needed (requires 3.18+)
+# Upgrade cmake (requires 3.18+)
 pip3 install cmake --upgrade
 echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
+cmake --version
 ```
 
 ### Build with CUDA
@@ -116,29 +156,102 @@ cmake .. -DGGML_CUDA=ON
 cmake --build . --config Release -j4
 ```
 
-### Download Models
+### Download Models (wget)
 
 ```bash
-pip3 install huggingface_hub
+mkdir -p ~/models
+cd ~/models
 
-# Example: Download Llama 3.2 3B
-huggingface-cli download TheBloke/Llama-2-7B-Chat-GGUF llama-2-7b-chat.Q4_K_M.gguf --local-dir ./models
+# Qwen3-VL-4B (multimodal, 2.5GB)
+wget https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct-GGUF/resolve/main/Qwen3VL-4B-Instruct-Q4_K_M.gguf
+
+# Vision encoder (836MB)
+wget https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-4B-Instruct-F16.gguf
 ```
 
-### Run
+### Run Models
 
 ```bash
-./build/bin/llama-server -m models/model.gguf -ngl 99
+# Text chat
+cd ~/llama.cpp/build && sudo jetson_clocks && ./bin/llama-cli -m ~/models/Qwen3VL-4B-Instruct-Q4_K_M.gguf -ngl 99 -c 4096 -cnv
+
+# Multimodal (with image)
+cd ~/llama.cpp/build && sudo jetson_clocks && ./bin/llama-mtmd-cli -m ~/models/Qwen3VL-4B-Instruct-Q4_K_M.gguf --mmproj ~/models/mmproj-Qwen3VL-4B-Instruct-F16.gguf -ngl 99 -c 4096 -cnv
 ```
+
+### Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `-m` | Model path |
+| `-ngl 99` | Offload all layers to GPU |
+| `-c 4096` | Context length |
+| `-cnv` | Conversation mode |
+| `--mmproj` | Vision encoder for multimodal |
+| `--image` | Image path for multimodal |
 
 ## Recommended Models for 8GB
 
-| Model | Context | Quantization | Speed (est.) |
-|-------|---------|--------------|--------------|
-| Llama 3.2 3B | 128K | Q4_K_M | ~15-20 tok/s |
-| Phi-3 Mini 128K | 128K | Q4_K_M | ~18-22 tok/s |
-| Qwen 3 4B | 32K | Q4_K_M | ~12-15 tok/s |
-| Mistral 7B | 32K | Q4_0 | ~8-12 tok/s |
+| Model | Size | Context | Use Case |
+|-------|------|---------|----------|
+| Qwen3-VL-2B | 1.5GB | 8K+ | Multimodal, lightweight |
+| Qwen3-VL-4B | 2.5GB | 8K+ | Multimodal, balanced |
+| Llama 3.2 3B | 2GB | 128K | Long context text |
+| Phi-3 Mini | 2.3GB | 128K | Long context text |
+| Qwen2.5 3B | 2GB | 32K | General text |
+
+## LLM Framework Comparison
+
+| Framework | Xavier NX Support | Ease of Use | Performance |
+|-----------|-------------------|-------------|-------------|
+| **llama.cpp** | Excellent | Medium | Best |
+| **Ollama** | Good | Easiest | Good |
+| **TensorRT-LLM** | Limited (Orin only) | Hard | Best |
+| **vLLM** | Not recommended | - | - |
+
+## Remote Access with Tailscale
+
+```bash
+# Install
+curl -fsSL https://tailscale.com/install.sh | sh
+# or
+wget -qO- https://tailscale.com/install.sh | sh
+
+# Start and login
+sudo tailscale up
+
+# Get Tailscale IP
+tailscale ip -4
+
+# Enable on boot
+sudo systemctl enable tailscaled
+```
+
+Connect from anywhere: `ssh user@100.x.x.x`
+
+## Screen (Keep Tasks Running)
+
+```bash
+# Install
+sudo apt install screen
+
+# Create session
+screen -S download
+
+# Run long task
+wget https://...
+
+# Detach: Ctrl+A, D
+
+# Reattach
+screen -r download
+
+# Force reattach (if Attached elsewhere)
+screen -d -r download
+
+# Kill all screens
+killall screen
+```
 
 ## Disable Unused Services (Free Memory)
 
@@ -176,7 +289,10 @@ df -h
 lsblk
 
 # Check GPU info
-sudo python3.9 -m jtop
+jtop
+
+# Check Tailscale status
+tailscale status
 
 # Reboot
 sudo reboot
