@@ -190,6 +190,65 @@ cd ~/llama.cpp/build && sudo jetson_clocks && ./bin/llama-mtmd-cli -m ~/models/Q
 | `--mmproj` | Vision encoder for multimodal |
 | `--image` | Image path for multimodal |
 
+### Run as API Server (OpenAI-Compatible)
+
+**Quick start with tmux:**
+
+```bash
+tmux new -s llama
+~/llama.cpp/build/bin/llama-server -m ~/models/Qwen3VL-4B-Instruct-Q4_K_M-new.gguf --mmproj ~/models/mmproj-Qwen3VL-4B-Instruct-F16.gguf -ngl 99 --host 0.0.0.0 --port 8080 --api-key sk-jetson-qwen3vl-a3f8c2d1e9b7f4a6c0d2e8f1a5b3c7d9
+# Detach: Ctrl+b then d
+```
+
+**As a systemd service (auto-start on boot):**
+
+Create `/etc/systemd/system/llama.service`:
+
+```ini
+[Unit]
+Description=Llama.cpp Server
+After=network.target
+
+[Service]
+ExecStart=/home/baixianger/llama.cpp/build/bin/llama-server -m /home/baixianger/models/Qwen3VL-4B-Instruct-Q4_K_M-new.gguf --mmproj /home/baixianger/models/mmproj-Qwen3VL-4B-Instruct-F16.gguf -ngl 99 --host 0.0.0.0 --port 8080 --api-key sk-jetson-qwen3vl-a3f8c2d1e9b7f4a6c0d2e8f1a5b3c7d9
+Restart=always
+User=baixianger
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable llama
+sudo systemctl start llama
+
+# Check status
+sudo systemctl status llama
+
+# View logs
+sudo journalctl -u llama -f
+```
+
+**API Endpoints:**
+
+| Endpoint | Description |
+|----------|-------------|
+| `http://<IP>:8080/v1/chat/completions` | OpenAI-compatible chat |
+| `http://<IP>:8080/v1/completions` | Text completions |
+| `http://<IP>:8080/health` | Health check |
+
+**Test the API:**
+
+```bash
+curl http://localhost:8080/v1/chat/completions \
+  -H "Authorization: Bearer sk-jetson-qwen3vl-a3f8c2d1e9b7f4a6c0d2e8f1a5b3c7d9" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"qwen","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
 ## Recommended Models for 8GB
 
 | Model | Size | Context | Use Case |
