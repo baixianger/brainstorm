@@ -1,0 +1,51 @@
+diff --git a/nanobot/agent/context.py b/nanobot/agent/context.py
+--- a/nanobot/agent/context.py
++++ b/nanobot/agent/context.py
+@@ -12,12 +12,14 @@ class ContextBuilder:
+         tools: ToolRegistry,
+         skills_loader: SkillsLoader,
+         identity_name: str = "nanobot",
++        memory_content: str = None,
+     ):
+         self.workspace = workspace
+         self.tools = tools
+         self.skills_loader = skills_loader
+         self.identity_name = identity_name
++        self.memory_content = memory_content
+
+     def _build_system_prompt(self) -> str:
+         """Build the complete system prompt."""
+@@ -40,10 +42,12 @@ class ContextBuilder:
+         if tools_doc:
+             parts.append(f"# Available Tools\n\n{tools_doc}")
+
+-        # Memory context (from MemoryStore)
+-        memory = MemoryStore(self.workspace)
+-        memory_context = memory.get_memory_context()
+-        if memory_context:
++        # Memory context (passed from MemoryManager)
++        # This replaces the old single-scope MemoryStore approach
++        # The memory is now context-aware (user vs group, read vs write)
++        memory_context = self.memory_content
++        if memory_context and memory_context.strip():
+             parts.append(f"# Memory\n\n{memory_context}")
+
+         # Skills
+@@ -52,7 +56,7 @@ class ContextBuilder:
+
+         return "\n\n---\n\n".join(parts)
+
+-    def build_messages(self, history: list, user_content: str, media: list = None) -> list:
++    def build_messages(self, history: list, user_content: str, media: list = None, memory_content: str = None) -> list:
+         """
+         Build the complete message array for the LLM.
+
+@@ -60,6 +64,9 @@ class ContextBuilder:
+             history: Previous conversation messages
+             user_content: Current user message
+             media: Optional media attachments
++            memory_content: Optional memory context (overrides self.memory_content)
+         """
++        if memory_content:
++            self.memory_content = memory_content
+         messages = [{"role": "system", "content": self._build_system_prompt()}]

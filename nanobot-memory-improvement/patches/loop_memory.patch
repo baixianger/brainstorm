@@ -1,0 +1,59 @@
+diff --git a/nanobot/agent/loop.py b/nanobot/agent/loop.py
+--- a/nanobot/agent/loop.py
++++ b/nanobot/agent/loop.py
+@@ -1,6 +1,8 @@
+ """Core agent loop for nanobot."""
+
++from nanobot.agent.memory_manager import MemoryManager, MemoryContext
++from nanobot.agent.tools.memory_tools import register_memory_tools
+
+ class AgentLoop:
+     """
+@@ -15,6 +17,7 @@ class AgentLoop:
+         max_iterations: int = 10,
+         api_keys: dict = None,
+         allow_shell: bool = True,
++        memory_manager: MemoryManager = None,
+     ):
+         self.bus = bus
+         self.provider = provider
+@@ -22,6 +25,9 @@ class AgentLoop:
+         self.model = model
+         self.max_iterations = max_iterations
+         self.api_keys = api_keys or {}
++
++        # Initialize memory manager
++        self.memory_manager = memory_manager or MemoryManager(workspace)
+
+         # Initialize components
+         self.tools = ToolRegistry()
+@@ -52,6 +58,15 @@ class AgentLoop:
+
+     async def _process_message(self, msg: InboundMessage):
+         """Process a single inbound message."""
++
++        # Build memory context from message
++        mem_ctx = MemoryContext.from_message(msg)
++
++        # Get memory content for this context
++        memory_content = self.memory_manager.get_context_for_chat(mem_ctx)
++
++        # Register memory tools with current context
++        register_memory_tools(self.tools, self.memory_manager, mem_ctx)
+
+         # Get or create session
+         session_key = msg.session_key
+@@ -63,10 +78,11 @@ class AgentLoop:
+             workspace=self.workspace,
+             tools=self.tools,
+             skills_loader=self.skills_loader,
++            memory_content=memory_content,  # Pass pre-built memory
+         )
+
+-        # Build messages including history
+-        messages = context.build_messages(history, msg.content, msg.media)
++        # Build messages including history and memory
++        messages = context.build_messages(history, msg.content, msg.media, memory_content)
+
+         # Run agent loop
+         for i in range(self.max_iterations):
