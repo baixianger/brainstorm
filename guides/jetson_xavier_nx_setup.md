@@ -288,6 +288,73 @@ sudo systemctl enable tailscaled
 
 Connect from anywhere: `ssh user@100.x.x.x`
 
+### Tailscale Exit Node (IPv4 Gateway)
+
+The Jetson serves as a Tailscale exit node, providing IPv4 internet access to IPv6-only VPS servers in the network.
+
+**Network topology:**
+
+```
+personal-dev (100.78.109.51, IPv6-only) ──┐
+                                          ├──► jetson exit node (100.119.64.58) ──► IPv4 internet
+sport-use-dev (100.70.35.15, IPv6-only) ──┘
+```
+
+#### Step 1: Enable IP Forwarding on Jetson
+
+```bash
+# IPv4 forwarding
+echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+
+# IPv6 forwarding
+echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.d/99-tailscale.conf
+
+# Apply
+sudo sysctl -p /etc/sysctl.d/99-tailscale.conf
+```
+
+#### Step 2: Advertise Jetson as Exit Node
+
+```bash
+sudo tailscale set --advertise-exit-node
+```
+
+#### Step 3: Approve in Admin Console
+
+Go to https://login.tailscale.com/admin/machines → find **jetson** → `...` menu → **Edit route settings** → toggle **Use as exit node**.
+
+Alternatively, add auto-approval in ACL policy (https://login.tailscale.com/admin/acls/file):
+
+```json
+"autoApprovers": {
+    "exitNode": ["autogroup:member"]
+}
+```
+
+#### Step 4: Configure VPS to Use Exit Node
+
+On each VPS that needs IPv4 access:
+
+```bash
+# Set Jetson as exit node
+sudo tailscale set --exit-node=100.119.64.58
+
+# Verify IPv4 works
+curl -4 ifconfig.me
+```
+
+To stop using the exit node:
+
+```bash
+sudo tailscale set --exit-node=
+```
+
+#### Notes
+
+- Exit node only affects **outbound** traffic. Inbound connections (e.g., websites hosted on the VPS) are unaffected.
+- Each device **opts in** individually — other Tailscale devices are not affected.
+- The VPS outbound IPv4 address will be the Jetson's public IP (`188.180.104.0`).
+
 ## Screen (Keep Tasks Running)
 
 ```bash
