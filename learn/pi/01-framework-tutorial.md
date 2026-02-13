@@ -7,13 +7,13 @@
 
 ## 框架概况
 
-| 特性 | 说明 |
-|------|------|
-| 包名 | `@mariozechner/pi-ai` |
-| 支持 Provider | 20+（OpenAI, Anthropic, Google, Azure, Bedrock, xAI, Groq, Mistral 等）|
-| API 协议 | 9 种（anthropic-messages, openai-completions, openai-responses, google-generative-ai 等）|
-| 核心功能 | 统一流式、工具调用、thinking/reasoning、Token 计费、跨 Provider 切换 |
-| 代码规模 | 模型注册表 312KB（自动生成），Provider 适配器最大 28KB |
+| 特性          | 说明                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------- |
+| 包名          | `@mariozechner/pi-ai`                                                                 |
+| 支持 Provider | 20+（OpenAI, Anthropic, Google, Azure, Bedrock, xAI, Groq, Mistral 等）                  |
+| API 协议      | 9 种（anthropic-messages, openai-completions, openai-responses, google-generative-ai 等） |
+| 核心功能        | 统一流式、工具调用、thinking/reasoning、Token 计费、跨 Provider 切换                                   |
+| 代码规模        | 模型注册表 312KB（自动生成），Provider 适配器最大 28KB                                                 |
 
 ---
 
@@ -553,12 +553,12 @@ registerApiProvider({
 
 ### OpenAI 与 Anthropic 的关键差异
 
-| 差异点 | Anthropic | OpenAI |
-|--------|-----------|--------|
-| Tool result 角色 | 嵌入 `user` 消息 | 独立 `role: "tool"` |
-| Tool call 名称 | `tool_use` | `tool_calls` |
-| 参数流式到达 | `input_json_delta` | `function.arguments` 字符串片段 |
-| 兼容性 | 仅 Anthropic | Groq, Mistral, xAI 等都兼容 |
+| 差异点            | Anthropic          | OpenAI                     |
+| -------------- | ------------------ | -------------------------- |
+| Tool result 角色 | 嵌入 `user` 消息       | 独立 `role: "tool"`          |
+| Tool call 名称   | `tool_use`         | `tool_calls`               |
+| 参数流式到达         | `input_json_delta` | `function.arguments` 字符串片段 |
+| 兼容性            | 仅 Anthropic        | Groq, Mistral, xAI 等都兼容    |
 
 > OpenAI 兼容格式的 Provider 复用率最高，原框架的 `openai-completions.ts` 有 28KB，光兼容性处理就有 15+ 种 Provider 特殊情况。
 
@@ -788,29 +788,29 @@ const response2 = await complete(openaiModel, context); // 无缝切换
 
 ## 开发路线图
 
-| 阶段 | 内容 | 复杂度 | 文件 |
-|------|------|--------|------|
-| 1 | 核心类型定义 | 低 | `types.ts` |
-| 2 | 异步事件流 | 中 | `utils/event-stream.ts` |
-| 3 | Provider 注册表 | 低 | `api-registry.ts` |
-| 4 | Anthropic Provider | **高** | `providers/anthropic.ts` |
-| 5 | OpenAI Provider | **高** | `providers/openai.ts` |
-| 6 | 统一入口 | 低 | `stream.ts` |
-| 7 | 模型注册表 | 低 | `models.ts` |
-| 8 | 跨 Provider 消息转换 | **高** | `providers/transform-messages.ts` |
-| 9 | 工具参数验证 | 中 | `utils/validation.ts` |
-| 10 | 打包导出 | 低 | `index.ts` |
+| 阶段  | 内容                 | 复杂度   | 文件                                |
+| --- | ------------------ | ----- | --------------------------------- |
+| 1   | 核心类型定义             | 低     | `types.ts`                        |
+| 2   | 异步事件流              | 中     | `utils/event-stream.ts`           |
+| 3   | Provider 注册表       | 低     | `api-registry.ts`                 |
+| 4   | Anthropic Provider | **高** | `providers/anthropic.ts`          |
+| 5   | OpenAI Provider    | **高** | `providers/openai.ts`             |
+| 6   | 统一入口               | 低     | `stream.ts`                       |
+| 7   | 模型注册表              | 低     | `models.ts`                       |
+| 8   | 跨 Provider 消息转换    | **高** | `providers/transform-messages.ts` |
+| 9   | 工具参数验证             | 中     | `utils/validation.ts`             |
+| 10  | 打包导出               | 低     | `index.ts`                        |
 
 ### 进阶扩展
 
-| 功能 | 说明 |
-|------|------|
-| Thinking 抽象 | 统一 `ThinkingLevel`（minimal/low/medium/high/xhigh）映射到各 Provider |
-| Prompt Caching | 统一 `CacheRetention`（none/short/long）映射到各 Provider 缓存机制 |
-| 部分 JSON 解析 | 用 `partial-json` 库实时解析流式到达的工具参数 |
-| OAuth 认证 | 内置 Anthropic, GitHub Copilot, Google 等 OAuth 流程 |
-| 上下文溢出检测 | 模式匹配 15+ Provider 的不同溢出错误消息 |
-| 模型自动生成 | 脚本从各 Provider API 拉取最新模型信息 |
+| 功能             | 说明                                                             |
+| -------------- | -------------------------------------------------------------- |
+| Thinking 抽象    | 统一 `ThinkingLevel`（minimal/low/medium/high/xhigh）映射到各 Provider |
+| Prompt Caching | 统一 `CacheRetention`（none/short/long）映射到各 Provider 缓存机制         |
+| 部分 JSON 解析     | 用 `partial-json` 库实时解析流式到达的工具参数                                |
+| OAuth 认证       | 内置 Anthropic, GitHub Copilot, Google 等 OAuth 流程                |
+| 上下文溢出检测        | 模式匹配 15+ Provider 的不同溢出错误消息                                    |
+| 模型自动生成         | 脚本从各 Provider API 拉取最新模型信息                                     |
 
 ---
 
