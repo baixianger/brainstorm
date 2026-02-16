@@ -1,0 +1,255 @@
+<mxfile host="app.diagrams.net" modified="2026-02-13" agent="Claude Code" version="24.0.0" type="device">
+  <diagram id="pi-framework-flow" name="Pi-AI Framework Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;Pi-AI Framework — Data Flow Architecture&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="450" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Layer 1: User Code ==================== -->
+        <mxCell id="user-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="340" y="80" width="620" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="user-label" value="&lt;b&gt;User Code&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="350" y="85" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stream-fn" value="&lt;b&gt;stream()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(model, context, options?)&lt;br&gt;→ AsyncIterable&amp;lt;StreamEvent&amp;gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="380" y="110" width="240" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="complete-fn" value="&lt;b&gt;complete()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(model, context, options?)&lt;br&gt;→ Promise&amp;lt;AssistantMessage&amp;gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="680" y="110" width="240" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Layer 2: Context (input) ==================== -->
+        <mxCell id="context-box" value="&lt;b&gt;Context&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;{ systemPrompt, messages[], tools[] }&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="100" y="105" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="model-box" value="&lt;b&gt;Model&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;{ id, provider, api, pricing }&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="105" width="190" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows from Context/Model to stream -->
+        <mxCell id="e-ctx-stream" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1" source="context-box" target="stream-fn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-model-complete" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1" source="model-box" target="complete-fn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Layer 3: API Registry ==================== -->
+        <mxCell id="registry" value="&lt;b&gt;API Registry&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Map&amp;lt;api_protocol, adapter_fn&amp;gt;&lt;br&gt;Routes model.api → correct provider adapter&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="440" y="230" width="420" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows stream/complete → registry -->
+        <mxCell id="e-stream-reg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="stream-fn" target="registry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-complete-reg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="complete-fn" target="registry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-stream-reg-label" value="&lt;font style=&quot;font-size:10px&quot;&gt;lookup(model.api)&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;" vertex="1" connectable="0" parent="e-stream-reg">
+          <mxGeometry x="-0.1" relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- ==================== Layer 4: Provider Adapters ==================== -->
+        <mxCell id="adapter-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="160" y="340" width="980" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="adapter-label" value="&lt;b&gt;Provider Adapters&lt;/b&gt; — self-register into API Registry" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="170" y="345" width="350" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="adapter-anthropic" value="&lt;b&gt;Anthropic Adapter&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;anthropic-messages&lt;br&gt;• tool_use / thinking&lt;br&gt;• input_json_delta&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="190" y="375" width="180" height="85" as="geometry" />
+        </mxCell>
+
+        <mxCell id="adapter-openai" value="&lt;b&gt;OpenAI Adapter&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;openai-completions&lt;br&gt;• tool_calls / function&lt;br&gt;• arguments string chunks&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="410" y="375" width="180" height="85" as="geometry" />
+        </mxCell>
+
+        <mxCell id="adapter-google" value="&lt;b&gt;Google Adapter&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;google-generative-ai&lt;br&gt;• functionCall&lt;br&gt;• GenerateContent&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="630" y="375" width="180" height="85" as="geometry" />
+        </mxCell>
+
+        <mxCell id="adapter-bedrock" value="&lt;b&gt;AWS Bedrock&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;+ 20 more providers&lt;br&gt;...&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#b85450;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="850" y="375" width="180" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- Registry → Adapters -->
+        <mxCell id="e-reg-anthropic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="registry" target="adapter-anthropic">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-reg-openai" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="registry" target="adapter-openai">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-reg-google" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1" source="registry" target="adapter-google">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-reg-bedrock" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;dashed=1;" edge="1" parent="1" source="registry" target="adapter-bedrock">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Conversion boxes inside adapters ==================== -->
+
+        <!-- ==================== Layer 5: LLM Providers (External) ==================== -->
+        <mxCell id="llm-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="160" y="535" width="980" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="llm-label" value="&lt;b&gt;External LLM APIs&lt;/b&gt; (REST / SDK)" style="text;html=1;align=left;verticalAlign=top;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="170" y="540" width="250" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="llm-anthropic" value="&lt;b&gt;Anthropic API&lt;/b&gt;" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="205" y="560" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="llm-openai" value="&lt;b&gt;OpenAI API&lt;/b&gt;" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="435" y="560" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="llm-google" value="&lt;b&gt;Google AI API&lt;/b&gt;" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="655" y="560" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="llm-bedrock" value="&lt;b&gt;AWS Bedrock&lt;/b&gt;" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="875" y="560" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Adapter → LLM -->
+        <mxCell id="e-adp-llm1" value="&lt;font style=&quot;font-size:9px&quot;&gt;HTTP SSE&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="adapter-anthropic" target="llm-anthropic">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-adp-llm2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="adapter-openai" target="llm-openai">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-adp-llm3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="adapter-google" target="llm-google">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-adp-llm4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;dashed=1;" edge="1" parent="1" source="adapter-bedrock" target="llm-bedrock">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Layer 6: EventStream ==================== -->
+        <mxCell id="eventstream" value="&lt;b&gt;EventStream&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Producer-Consumer Queue + Hooks&lt;br&gt;push(event) → queue → yield to consumer&lt;br&gt;close(result) → resolve Promise&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="400" y="670" width="500" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- LLM response flows back through adapters to EventStream -->
+        <mxCell id="e-llm-back" value="&lt;font style=&quot;font-size:9px;color:#82b366&quot;&gt;SSE events parsed → unified StreamEvents&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="llm-group" target="eventstream">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="650" y="640" />
+              <mxPoint x="650" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== Layer 7: Consumers ==================== -->
+        <mxCell id="consumer-realtime" value="&lt;b&gt;Real-time Consumer&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;for await (event of stream)&lt;br&gt;→ UI updates, text deltas&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="310" y="800" width="260" height="65" as="geometry" />
+        </mxCell>
+
+        <mxCell id="consumer-final" value="&lt;b&gt;Final Result Consumer&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;await stream.result()&lt;br&gt;→ AssistantMessage + Usage&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="730" y="800" width="260" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- EventStream → Consumers -->
+        <mxCell id="e-es-rt" value="&lt;font style=&quot;font-size:9px&quot;&gt;AsyncIterable&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="eventstream" target="consumer-realtime">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-es-final" value="&lt;font style=&quot;font-size:9px&quot;&gt;Promise&lt;/font&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="eventstream" target="consumer-final">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Core Types (sidebar) ==================== -->
+        <mxCell id="types-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=1;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="200" width="230" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="types-label" value="&lt;b&gt;Core Types&lt;/b&gt; (Unified)" style="text;html=1;align=center;verticalAlign=top;fontSize=12;fontColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="210" width="170" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="type-message" value="&lt;b&gt;Message&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;User | Assistant | ToolResult&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1235" y="240" width="200" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="type-content" value="&lt;b&gt;ContentBlock&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;text | image | thinking | tool_call&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1235" y="285" width="200" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="type-tool" value="&lt;b&gt;Tool&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;{ name, description, parameters }&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1235" y="330" width="200" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="type-streamevent" value="&lt;b&gt;StreamEvent&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;start | text_delta | thinking_delta&lt;br&gt;tool_call_start/delta/end | done | error&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1235" y="375" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="type-usage" value="&lt;b&gt;Usage&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;{ inputTokens, outputTokens, cost }&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1235" y="435" width="200" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="type-eventstream" value="&lt;b&gt;EventStream&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;AsyncIterable + Promise&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1235" y="480" width="200" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Dashed lines from types to relevant components -->
+        <mxCell id="e-types-registry" style="rounded=1;strokeColor=#d6b656;strokeWidth=1;dashed=1;endArrow=none;" edge="1" parent="1" source="types-group" target="registry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-types-es" style="rounded=1;strokeColor=#d6b656;strokeWidth=1;dashed=1;endArrow=none;" edge="1" parent="1" source="type-eventstream" target="eventstream">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Conversion detail box ==================== -->
+        <mxCell id="conversion-box" value="&lt;b&gt;Each Adapter Performs:&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;1. Message[] → provider format&lt;br&gt;2. Tool[] → provider schema&lt;br&gt;3. Provider SSE → StreamEvent[]&lt;br&gt;4. Provider errors → normalized errors&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="30" y="380" width="140" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== Legend ==================== -->
+        <mxCell id="legend-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#CCCCCC;" vertex="1" parent="1">
+          <mxGeometry x="30" y="820" width="230" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="825" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="45" y="850" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1t" value="&lt;font style=&quot;font-size:10px&quot;&gt;User-facing API&lt;/font&gt;" style="text;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="845" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="45" y="870" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2t" value="&lt;font style=&quot;font-size:10px&quot;&gt;Routing / Registry&lt;/font&gt;" style="text;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="865" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="45" y="890" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3t" value="&lt;font style=&quot;font-size:10px&quot;&gt;Provider Adapters&lt;/font&gt;" style="text;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="885" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="45" y="910" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4t" value="&lt;font style=&quot;font-size:10px&quot;&gt;Streaming / Data Flow&lt;/font&gt;" style="text;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="905" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5" value="" style="rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="45" y="930" width="20" height="12" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5t" value="&lt;font style=&quot;font-size:10px&quot;&gt;Core Types&lt;/font&gt;" style="text;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="925" width="120" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
