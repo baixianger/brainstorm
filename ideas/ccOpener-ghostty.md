@@ -1,33 +1,41 @@
 # ccOpener (Ghostty) - Finder Toolbar Launcher for Claude Code
 
-A macOS Automator app that adds a button to Finder's toolbar to launch Claude Code in **Ghostty** terminal in the current folder with `--dangerously-skip-permissions` flag.
+A macOS AppleScript applet that adds a button to Finder's toolbar to launch Claude Code in **Ghostty** terminal in the current folder with `--dangerously-skip-permissions` flag.
 
 ## How It Works
 
-Click the toolbar button → Opens Ghostty → Runs `claude --dangerously-skip-permissions` in the current Finder folder.
+Click the toolbar button → Writes a temp launch script → Opens Ghostty via `-e` flag → Runs `claude --dangerously-skip-permissions` in the current Finder folder.
+
+Ghostty has no AppleScript dictionary (unlike Terminal/iTerm2), so the approach writes a small shell script to `/tmp/` and passes it to Ghostty's `-e` flag via `open -na`.
 
 ## Build Instructions
 
-### 1. Create Automator App
+### 1. Create AppleScript Applet
 
-Open **Automator** → New Document → **Application**
-
-Add action: **Run Shell Script**
+Open **Script Editor** → New Document
 
 Paste this script:
 
-```bash
-#!/bin/bash
-DIR=$(osascript -e 'tell application "Finder" to get POSIX path of (target of front window as alias)')
-
-# Remove trailing slash for consistency
-DIR="${DIR%/}"
-
-# Launch Ghostty with working directory, then run claude
-open -na Ghostty --args --working-directory="$DIR" -e "claude --dangerously-skip-permissions"
+```applescript
+on run
+	set theDir to do shell script "osascript -e 'tell application \"Finder\" to get POSIX path of (target of front window as alias)'"
+	if theDir ends with "/" and length of theDir > 1 then
+		set theDir to text 1 thru -2 of theDir
+	end if
+	set tmpFile to "/tmp/cc-ghostty-launch.sh"
+	set scriptContent to "#!/bin/zsh" & linefeed & "source ~/.zshrc" & linefeed & "cd " & quoted form of theDir & " && claude --dangerously-skip-permissions" & linefeed
+	do shell script "echo " & quoted form of scriptContent & " > " & tmpFile & " && chmod +x " & tmpFile
+	do shell script "open -na Ghostty --args -e " & tmpFile
+end run
 ```
 
-Save as `ccOpener-ghostty.app`
+Save as **Application** (`File → Export → File Format: Application`) → name it `ccOpener-ghostty.app`
+
+Or compile from the command line:
+
+```bash
+osacompile -o ccOpener-ghostty.app ccOpener-ghostty.applescript
+```
 
 ### 2. Add Custom Icon (Optional)
 
@@ -82,26 +90,16 @@ Apply icon:
 
 macOS will ask for permission to control Finder. Click **OK**.
 
-## Alternative Script (if `-e` flag is not available)
+## Why Not Automator or Keystrokes?
 
-If your version of Ghostty doesn't support the `-e` flag, use this approach that opens Ghostty in the directory and sends the command via AppleScript:
+- **Automator** (`on run {input, parameters}`) causes error `-1721` when launched from Finder toolbar because AppleScript applets don't receive Automator-style parameters.
+- **Keystrokes via System Events** require adding the app to Accessibility permissions (System Settings → Privacy & Security → Accessibility). Ghostty has no AppleScript dictionary, so `do script` (like Terminal) is not available.
+- **The temp script + `-e` flag approach** avoids both issues: no extra permissions, no Automator, and Ghostty handles the execution natively.
 
-```bash
-#!/bin/bash
-DIR=$(osascript -e 'tell application "Finder" to get POSIX path of (target of front window as alias)')
-DIR="${DIR%/}"
+## Notes
 
-open -na Ghostty --args --working-directory="$DIR"
-sleep 1
-osascript -e "
-tell application \"System Events\"
-    tell process \"Ghostty\"
-        keystroke \"claude --dangerously-skip-permissions\"
-        keystroke return
-    end tell
-end tell
-"
-```
+- The `source ~/.zshrc` line ensures `claude` is in PATH, since Ghostty's `-e` flag doesn't load the login shell profile.
+- The temp script is written to `/tmp/cc-ghostty-launch.sh` and is overwritten on each launch.
 
 ## Requirements
 

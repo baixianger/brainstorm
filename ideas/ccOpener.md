@@ -1,6 +1,6 @@
 # ccOpener - Finder Toolbar Launcher for Claude Code
 
-A macOS Automator app that adds a button to Finder's toolbar to launch Claude Code in the current folder with `--dangerously-skip-permissions` flag.
+A macOS AppleScript applet that adds a button to Finder's toolbar to launch Claude Code in the current folder with `--dangerously-skip-permissions` flag.
 
 ## How It Works
 
@@ -8,24 +8,31 @@ Click the toolbar button → Opens Terminal → Runs `claude --dangerously-skip-
 
 ## Build Instructions
 
-### 1. Create Automator App
+### 1. Create AppleScript Applet
 
-Open **Automator** → New Document → **Application**
-
-Add action: **Run Shell Script**
+Open **Script Editor** → New Document
 
 Paste this script:
 
-```bash
-#!/bin/bash
-DIR=$(osascript -e 'tell application "Finder" to get POSIX path of (target of front window as alias)')
-osascript -e "tell application \"Terminal\"
-    activate
-    do script \"cd '$DIR' && claude --dangerously-skip-permissions\"
-end tell"
+```applescript
+on run
+	set theDir to do shell script "osascript -e 'tell application \"Finder\" to get POSIX path of (target of front window as alias)'"
+	tell application "Terminal"
+		activate
+		do script "cd " & quoted form of theDir & " && claude --dangerously-skip-permissions"
+	end tell
+end run
 ```
 
-Save as `ccOpener.app`
+Save as **Application** (`File → Export → File Format: Application`) → name it `ccOpener.app`
+
+Or compile from the command line:
+
+```bash
+osacompile -o ccOpener.app ccOpener.applescript
+```
+
+**Important:** Use `on run` (no parameters), not `on run {input, parameters}`. The Automator-style handler causes error `-1721` when launched from the Finder toolbar.
 
 ### 2. Add Custom Icon (Optional)
 
@@ -73,7 +80,7 @@ Apply icon:
 ### 3. Add to Finder Toolbar
 
 1. Open Finder
-2. Hold **⌘ Command**
+2. Hold **Command**
 3. Drag `ccOpener.app` to the toolbar
 
 ### 4. First Run
@@ -84,18 +91,25 @@ macOS will ask for permission to control Terminal and Finder. Click **OK**.
 
 Replace the Terminal block in the script with:
 
-```bash
-osascript -e "tell application \"iTerm\"
-    activate
-    set newWindow to (create window with default profile)
-    tell current session of newWindow
-        write text \"cd '$DIR' && claude --dangerously-skip-permissions\"
-    end tell
-end tell"
+```applescript
+on run
+	set theDir to do shell script "osascript -e 'tell application \"Finder\" to get POSIX path of (target of front window as alias)'"
+	tell application "iTerm"
+		activate
+		set newWindow to (create window with default profile)
+		tell current session of newWindow
+			write text "cd " & quoted form of theDir & " && claude --dangerously-skip-permissions"
+		end tell
+	end tell
+end run
 ```
+
+## For Ghostty Users
+
+See [ccOpener-ghostty.md](ccOpener-ghostty.md) — Ghostty requires a different approach since it has no AppleScript dictionary.
 
 ## Requirements
 
-- macOS (tested on Big Sur+)
+- macOS (tested on Sequoia+)
 - Claude Code CLI installed (`claude` command available)
 - ImageMagick (for custom icon generation)
