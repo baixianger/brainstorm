@@ -240,6 +240,35 @@
     }
     .doc-footer a { color: var(--red); text-decoration: none; }
 
+    /* ===== Details / Collapsible ===== */
+    details {
+      margin: 16px 0; border: 1px solid var(--border); border-radius: 6px;
+      overflow: hidden;
+    }
+    summary {
+      padding: 10px 16px; font-family: var(--font-sans); font-size: 15px;
+      font-weight: 700; cursor: pointer; background: var(--bg-alt);
+      list-style: none; display: flex; align-items: center; gap: 8px;
+    }
+    summary::before {
+      content: '▶'; font-size: 11px; transition: transform 0.2s;
+      color: var(--text-light);
+    }
+    details[open] > summary::before { transform: rotate(90deg); }
+    summary::-webkit-details-marker { display: none; }
+    .details-body { padding: 16px 20px; font-size: 15px; }
+    .details-body h5 {
+      font-family: var(--font-sans); font-size: 14px; font-weight: 700;
+      margin: 16px 0 6px; color: var(--text);
+    }
+    .details-body h5:first-child { margin-top: 0; }
+    .details-body p { margin-bottom: 12px; }
+    .details-body ul { margin: 0 0 12px 20px; }
+    .details-body li { margin-bottom: 4px; font-size: 15px; }
+    .pros { color: var(--green); }
+    .cons { color: var(--red); }
+    .pattern-entry p { margin-bottom: 12px; }
+
     /* ===== Responsive ===== */
     @media (max-width: 900px) {
       .sidebar { transform: translateX(-100%); }
@@ -540,6 +569,79 @@
     <span class="en">Defines an interface for creating objects, but lets subclasses decide which class to instantiate. Use when you don't know beforehand the exact types your code should work with, or when you want to let users extend your library's internal components.</span>
     <span class="cn">定义一个创建对象的接口，但让子类决定实例化哪个类。当你事先不知道代码应该使用的确切类型时，或当你想让用户能够扩展库的内部组件时使用。</span>
   </p>
+  <details>
+    <summary><span class="en">Problem &amp; Solution</span><span class="cn">问题与解决方案</span></summary>
+    <div class="details-body">
+      <h5><span class="en">Problem</span><span class="cn">问题</span></h5>
+      <p><span class="en">Imagine you're developing a logistics management app. The first version only handles truck transport, so most code lives in the <code>Truck</code> class. Later, sea shipping companies want support too. Adding <code>Ship</code> requires changing all existing code &mdash; and every new transport type means another painful rewrite.</span><span class="cn">假设你正在开发一款物流管理应用。最初版本只能处理卡车运输，因此大部分代码都位于 <code>Truck</code> 类中。后来海运公司也想要支持。添加 <code>Ship</code> 类需要修改全部代码——每次新增运输方式都要再次大幅修改。</span></p>
+      <h5><span class="en">Solution</span><span class="cn">解决方案</span></h5>
+      <p><span class="en">Replace direct constructor calls with a special <em>factory method</em>. Subclasses override this method to return different product types. All products must implement a common interface (<code>Transport</code> with a <code>deliver()</code> method), so client code works with any transport type without knowing the concrete class.</span><span class="cn">使用特殊的工厂方法代替对构造函数的直接调用。子类重写该方法以返回不同类型的产品。所有产品都必须实现共同接口（<code>Transport</code> 及其 <code>deliver()</code> 方法），这样客户端代码无需了解具体类就能使用任何运输方式。</span></p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Cross-platform dialog example: the base Dialog class uses a factory method to create buttons, so subclasses can return platform-specific buttons.</span><span class="cn">跨平台对话框示例：基础 Dialog 类使用工厂方法创建按钮，子类可返回特定平台的按钮。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">Dialog</span> <span class="kw">is</span>
+    <span class="kw">abstract method</span> <span class="fn">createButton</span>(): Button
+
+    <span class="kw">method</span> <span class="fn">render</span>() <span class="kw">is</span>
+        Button okButton = <span class="fn">createButton</span>()
+        okButton.<span class="fn">onClick</span>(closeDialog)
+        okButton.<span class="fn">render</span>()
+
+<span class="kw">class</span> <span class="fn">WindowsDialog</span> <span class="kw">extends</span> Dialog <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">createButton</span>(): Button <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">WindowsButton</span>()
+
+<span class="kw">class</span> <span class="fn">WebDialog</span> <span class="kw">extends</span> Dialog <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">createButton</span>(): Button <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">HTMLButton</span>()
+
+<span class="kw">interface</span> <span class="fn">Button</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">render</span>()
+    <span class="kw">method</span> <span class="fn">onClick</span>(f)
+
+<span class="kw">class</span> <span class="fn">WindowsButton</span> <span class="kw">implements</span> Button <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">render</span>(a, b) <span class="kw">is</span>
+        <span class="cm">// Render a button in Windows style.</span>
+    <span class="kw">method</span> <span class="fn">onClick</span>(f) <span class="kw">is</span>
+        <span class="cm">// Bind an OS click event.</span>
+
+<span class="kw">class</span> <span class="fn">HTMLButton</span> <span class="kw">implements</span> Button <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">render</span>(a, b) <span class="kw">is</span>
+        <span class="cm">// Return an HTML representation of a button.</span>
+    <span class="kw">method</span> <span class="fn">onClick</span>(f) <span class="kw">is</span>
+        <span class="cm">// Bind a web browser click event.</span>
+
+<span class="kw">class</span> <span class="fn">Application</span> <span class="kw">is</span>
+    <span class="kw">field</span> dialog: Dialog
+
+    <span class="kw">method</span> <span class="fn">initialize</span>() <span class="kw">is</span>
+        config = <span class="fn">readApplicationConfigFile</span>()
+        <span class="kw">if</span> (config.OS == <span class="st">"Windows"</span>) <span class="kw">then</span>
+            dialog = <span class="kw">new</span> <span class="fn">WindowsDialog</span>()
+        <span class="kw">else if</span> (config.OS == <span class="st">"Web"</span>) <span class="kw">then</span>
+            dialog = <span class="kw">new</span> <span class="fn">WebDialog</span>()
+        <span class="kw">else</span>
+            <span class="kw">throw new</span> Exception(<span class="st">"Unknown OS."</span>)
+
+    <span class="kw">method</span> <span class="fn">main</span>() <span class="kw">is</span>
+        this.<span class="fn">initialize</span>()
+        dialog.<span class="fn">render</span>()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Avoids tight coupling between creator and concrete products.</span><span class="cn">避免创建者和具体产品之间的紧密耦合。</span></li>
+        <li class="pros"><span class="en"><em>Single Responsibility</em>: product creation code in one place.</span><span class="cn"><em>单一职责原则</em>：产品创建代码集中在一处。</span></li>
+        <li class="pros"><span class="en"><em>Open/Closed</em>: introduce new products without changing existing code.</span><span class="cn"><em>开闭原则</em>：无需更改现有代码即可引入新产品。</span></li>
+        <li class="cons"><span class="en">May require many new subclasses, increasing complexity.</span><span class="cn">可能需要引入许多新的子类，代码因此变得更复杂。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-creational" id="abstract-factory">
@@ -549,6 +651,67 @@
     <span class="en">Creates families of related objects without specifying their concrete classes. Ensures that created products are compatible with each other. Use when your code needs to work with various families of related products.</span>
     <span class="cn">创建一系列相关的对象，而无需指定其具体类。确保创建的产品相互兼容。当你的代码需要与多组相关产品交互时使用。</span>
   </p>
+  <details>
+    <summary><span class="en">Problem &amp; Solution</span><span class="cn">问题与解决方案</span></summary>
+    <div class="details-body">
+      <h5><span class="en">Problem</span><span class="cn">问题</span></h5>
+      <p><span class="en">A furniture shop simulator with product families (Chair, Sofa, CoffeeTable) in different styles (Modern, Victorian, ArtDeco). You need to ensure style consistency &mdash; a Modern sofa shouldn't be paired with a Victorian chair.</span><span class="cn">一个家具商店模拟器，包含产品族（椅子、沙发、咖啡桌）和不同风格（现代、维多利亚、装饰风艺术）。你需要确保风格一致——现代风沙发不应与维多利亚风椅子搭配。</span></p>
+      <h5><span class="en">Solution</span><span class="cn">解决方案</span></h5>
+      <p><span class="en">Declare interfaces for each product type, then create a factory interface with methods like <code>createChair()</code>, <code>createSofa()</code>. Each concrete factory (ModernFurnitureFactory, VictorianFurnitureFactory) only creates matching products.</span><span class="cn">为每种产品类型声明接口，然后创建一个包含 <code>createChair()</code>、<code>createSofa()</code> 等方法的工厂接口。每个具体工厂（ModernFurnitureFactory、VictorianFurnitureFactory）只创建匹配的产品。</span></p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Cross-platform UI elements: each factory creates matching buttons and checkboxes for a specific OS.</span><span class="cn">跨平台 UI 元素：每个工厂为特定操作系统创建匹配的按钮和复选框。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">GUIFactory</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">createButton</span>(): Button
+    <span class="kw">method</span> <span class="fn">createCheckbox</span>(): Checkbox
+
+<span class="kw">class</span> <span class="fn">WinFactory</span> <span class="kw">implements</span> GUIFactory <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">createButton</span>(): Button <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">WinButton</span>()
+    <span class="kw">method</span> <span class="fn">createCheckbox</span>(): Checkbox <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">WinCheckbox</span>()
+
+<span class="kw">class</span> <span class="fn">MacFactory</span> <span class="kw">implements</span> GUIFactory <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">createButton</span>(): Button <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">MacButton</span>()
+    <span class="kw">method</span> <span class="fn">createCheckbox</span>(): Checkbox <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">MacCheckbox</span>()
+
+<span class="kw">class</span> <span class="fn">Application</span> <span class="kw">is</span>
+    <span class="kw">private field</span> factory: GUIFactory
+    <span class="kw">private field</span> button: Button
+    <span class="kw">constructor</span> <span class="fn">Application</span>(factory: GUIFactory) <span class="kw">is</span>
+        this.factory = factory
+    <span class="kw">method</span> <span class="fn">createUI</span>() <span class="kw">is</span>
+        this.button = factory.<span class="fn">createButton</span>()
+    <span class="kw">method</span> <span class="fn">paint</span>() <span class="kw">is</span>
+        button.<span class="fn">paint</span>()
+
+<span class="cm">// App selects factory at startup based on config</span>
+<span class="kw">class</span> <span class="fn">ApplicationConfigurator</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">main</span>() <span class="kw">is</span>
+        config = <span class="fn">readApplicationConfigFile</span>()
+        <span class="kw">if</span> (config.OS == <span class="st">"Windows"</span>) <span class="kw">then</span>
+            factory = <span class="kw">new</span> <span class="fn">WinFactory</span>()
+        <span class="kw">else if</span> (config.OS == <span class="st">"Mac"</span>) <span class="kw">then</span>
+            factory = <span class="kw">new</span> <span class="fn">MacFactory</span>()
+        Application app = <span class="kw">new</span> <span class="fn">Application</span>(factory)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Products from the same factory are guaranteed compatible.</span><span class="cn">同一工厂生成的产品相互匹配。</span></li>
+        <li class="pros"><span class="en">Avoids coupling between client code and concrete products.</span><span class="cn">避免客户端和具体产品代码的耦合。</span></li>
+        <li class="pros"><span class="en"><em>Single Responsibility</em> &amp; <em>Open/Closed</em> principles.</span><span class="cn"><em>单一职责原则</em>和<em>开闭原则</em>。</span></li>
+        <li class="cons"><span class="en">Introduces many new interfaces and classes &mdash; increased complexity.</span><span class="cn">需要引入众多接口和类，代码可能更加复杂。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-creational" id="builder">
@@ -558,6 +721,59 @@
     <span class="en">Constructs complex objects step by step. Allows you to produce different types and representations using the same construction process. Especially useful to avoid a "telescoping constructor" with too many parameters.</span>
     <span class="cn">分步骤构造复杂对象。允许你使用相同的构造过程生成不同类型和形式的对象。当你想避免拥有太多参数的"伸缩构造函数"时尤其有用。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Building cars and their manuals using the same construction steps. A <code>Director</code> knows the build order; different builders produce different outputs.</span><span class="cn">使用相同的构造步骤建造汽车及其使用手册。<code>Director</code> 知道构建顺序；不同的生成器产生不同的输出。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">Builder</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">reset</span>()
+    <span class="kw">method</span> <span class="fn">setSeats</span>(...)
+    <span class="kw">method</span> <span class="fn">setEngine</span>(...)
+    <span class="kw">method</span> <span class="fn">setTripComputer</span>(...)
+    <span class="kw">method</span> <span class="fn">setGPS</span>(...)
+
+<span class="kw">class</span> <span class="fn">CarBuilder</span> <span class="kw">implements</span> Builder <span class="kw">is</span>
+    <span class="kw">private field</span> car: Car
+    <span class="kw">constructor</span> <span class="fn">CarBuilder</span>() <span class="kw">is</span>
+        this.<span class="fn">reset</span>()
+    <span class="kw">method</span> <span class="fn">reset</span>() <span class="kw">is</span>
+        this.car = <span class="kw">new</span> <span class="fn">Car</span>()
+    <span class="kw">method</span> <span class="fn">setSeats</span>(...) <span class="kw">is</span> <span class="cm">// Set car seat count</span>
+    <span class="kw">method</span> <span class="fn">setEngine</span>(...) <span class="kw">is</span> <span class="cm">// Install engine</span>
+    <span class="kw">method</span> <span class="fn">setTripComputer</span>(...) <span class="kw">is</span> <span class="cm">// Install trip computer</span>
+    <span class="kw">method</span> <span class="fn">setGPS</span>(...) <span class="kw">is</span> <span class="cm">// Install GPS</span>
+    <span class="kw">method</span> <span class="fn">getProduct</span>(): Car <span class="kw">is</span>
+        product = this.car
+        this.<span class="fn">reset</span>()
+        <span class="kw">return</span> product
+
+<span class="kw">class</span> <span class="fn">Director</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">constructSportsCar</span>(builder: Builder) <span class="kw">is</span>
+        builder.<span class="fn">reset</span>()
+        builder.<span class="fn">setSeats</span>(2)
+        builder.<span class="fn">setEngine</span>(<span class="kw">new</span> <span class="fn">SportEngine</span>())
+        builder.<span class="fn">setTripComputer</span>(<span class="kw">true</span>)
+        builder.<span class="fn">setGPS</span>(<span class="kw">true</span>)
+
+<span class="kw">class</span> <span class="fn">Application</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">makeCar</span>() <span class="kw">is</span>
+        director = <span class="kw">new</span> <span class="fn">Director</span>()
+        CarBuilder builder = <span class="kw">new</span> <span class="fn">CarBuilder</span>()
+        director.<span class="fn">constructSportsCar</span>(builder)
+        Car car = builder.<span class="fn">getProduct</span>()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Construct objects step-by-step, defer or recurse steps.</span><span class="cn">分步创建对象，可暂缓或递归执行步骤。</span></li>
+        <li class="pros"><span class="en">Reuse same construction code for different product representations.</span><span class="cn">生成不同形式的产品时可复用相同的制造代码。</span></li>
+        <li class="pros"><span class="en"><em>Single Responsibility</em>: isolate complex construction from business logic.</span><span class="cn"><em>单一职责原则</em>：将复杂构造代码与业务逻辑分离。</span></li>
+        <li class="cons"><span class="en">Overall code complexity increases due to new classes.</span><span class="cn">需要新增多个类，代码整体复杂程度增加。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-creational" id="prototype">
@@ -567,6 +783,62 @@
     <span class="en">Creates new objects by copying an existing object (prototype), delegating the cloning process to the actual objects being cloned. Use when your code shouldn't depend on the concrete classes of objects you need to copy.</span>
     <span class="cn">通过复制现有对象（原型）来创建新对象，将克隆过程委托给被克隆的实际对象。当代码不应依赖于需要复制的对象的具体类时使用。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Cloning geometric shapes. Each shape implements <code>clone()</code> via a copy constructor that copies all fields including private ones.</span><span class="cn">克隆几何图形。每个形状通过复制构造函数实现 <code>clone()</code>，复制所有字段包括私有字段。</span></p>
+<pre><code><span class="kw">abstract class</span> <span class="fn">Shape</span> <span class="kw">is</span>
+    <span class="kw">field</span> X: int
+    <span class="kw">field</span> Y: int
+    <span class="kw">field</span> color: string
+
+    <span class="kw">constructor</span> <span class="fn">Shape</span>(source: Shape) <span class="kw">is</span>
+        this.X = source.X
+        this.Y = source.Y
+        this.color = source.color
+
+    <span class="kw">abstract method</span> <span class="fn">clone</span>(): Shape
+
+<span class="kw">class</span> <span class="fn">Rectangle</span> <span class="kw">extends</span> Shape <span class="kw">is</span>
+    <span class="kw">field</span> width: int
+    <span class="kw">field</span> height: int
+
+    <span class="kw">constructor</span> <span class="fn">Rectangle</span>(source: Rectangle) <span class="kw">is</span>
+        <span class="kw">super</span>(source)
+        this.width = source.width
+        this.height = source.height
+
+    <span class="kw">method</span> <span class="fn">clone</span>(): Shape <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">Rectangle</span>(this)
+
+<span class="kw">class</span> <span class="fn">Circle</span> <span class="kw">extends</span> Shape <span class="kw">is</span>
+    <span class="kw">field</span> radius: int
+
+    <span class="kw">constructor</span> <span class="fn">Circle</span>(source: Circle) <span class="kw">is</span>
+        <span class="kw">super</span>(source)
+        this.radius = source.radius
+
+    <span class="kw">method</span> <span class="fn">clone</span>(): Shape <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">Circle</span>(this)
+
+<span class="cm">// Client code</span>
+shapes = [<span class="kw">new</span> <span class="fn">Circle</span>(), <span class="kw">new</span> <span class="fn">Rectangle</span>()]
+shapesCopy = []
+<span class="kw">foreach</span> (s <span class="kw">in</span> shapes) <span class="kw">do</span>
+    shapesCopy.<span class="fn">add</span>(s.<span class="fn">clone</span>())</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Clone objects without coupling to their concrete classes.</span><span class="cn">克隆对象而无需与具体类耦合。</span></li>
+        <li class="pros"><span class="en">Avoid repeated initialization code; clone pre-configured prototypes.</span><span class="cn">避免重复的初始化代码；克隆预配置的原型。</span></li>
+        <li class="pros"><span class="en">Produce complex objects more conveniently.</span><span class="cn">更方便地生成复杂对象。</span></li>
+        <li class="cons"><span class="en">Cloning objects with circular references can be tricky.</span><span class="cn">克隆包含循环引用的复杂对象可能很麻烦。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-creational" id="singleton">
@@ -576,6 +848,48 @@
     <span class="en">Ensures a class has only one instance while providing a global access point to it. Controls shared resources like a database connection. Use when a class should have only a single instance available to all clients.</span>
     <span class="cn">确保一个类只有一个实例，同时提供全局访问点。控制共享资源，如数据库连接。当一个类应该只有一个可供所有客户端使用的实例时使用。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">A Database class that ensures only one connection instance exists. Uses lazy initialization with thread-safe locking.</span><span class="cn">一个确保只有一个连接实例的 Database 类。使用延迟初始化和线程安全的锁机制。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">Database</span> <span class="kw">is</span>
+    <span class="kw">private static field</span> instance: Database
+
+    <span class="kw">private constructor</span> <span class="fn">Database</span>() <span class="kw">is</span>
+        <span class="cm">// Initialize database connection...</span>
+
+    <span class="kw">public static method</span> <span class="fn">getInstance</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (Database.instance == <span class="kw">null</span>) <span class="kw">then</span>
+            <span class="fn">acquireThreadLock</span>() <span class="kw">and then</span>
+                <span class="kw">if</span> (Database.instance == <span class="kw">null</span>) <span class="kw">then</span>
+                    Database.instance = <span class="kw">new</span> <span class="fn">Database</span>()
+        <span class="kw">return</span> Database.instance
+
+    <span class="kw">public method</span> <span class="fn">query</span>(sql) <span class="kw">is</span>
+        <span class="cm">// All database queries go through this method.</span>
+
+<span class="kw">class</span> <span class="fn">Application</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">main</span>() <span class="kw">is</span>
+        Database foo = Database.<span class="fn">getInstance</span>()
+        foo.<span class="fn">query</span>(<span class="st">"SELECT ..."</span>)
+        Database bar = Database.<span class="fn">getInstance</span>()
+        bar.<span class="fn">query</span>(<span class="st">"SELECT ..."</span>)
+        <span class="cm">// foo and bar contain the same object.</span></code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Guarantees a class has only one instance.</span><span class="cn">保证一个类只有一个实例。</span></li>
+        <li class="pros"><span class="en">Global access point to that instance.</span><span class="cn">获得指向该实例的全局访问节点。</span></li>
+        <li class="pros"><span class="en">Initialized only on first request (lazy init).</span><span class="cn">仅在首次请求时初始化（延迟初始化）。</span></li>
+        <li class="cons"><span class="en">Violates Single Responsibility &mdash; solves two problems at once.</span><span class="cn">违反单一职责原则——同时解决两个问题。</span></li>
+        <li class="cons"><span class="en">Can mask bad design; requires special handling in multithreaded environments.</span><span class="cn">可能掩盖不良设计；多线程环境下需要特殊处理。</span></li>
+        <li class="cons"><span class="en">Difficult to unit test due to private constructor.</span><span class="cn">由于私有构造函数，单元测试较困难。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="callout">
@@ -603,6 +917,54 @@
     <span class="en">Allows objects with incompatible interfaces to collaborate by wrapping one object to make it compatible with another. A "translator" between two incompatible interfaces.</span>
     <span class="cn">通过包装对象使不兼容的接口能够相互协作。是两个不兼容接口之间的"翻译者"。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">The classic "square peg in a round hole" example. <code>SquarePegAdapter</code> pretends to be a <code>RoundPeg</code>.</span><span class="cn">经典的"方钉与圆孔"示例。<code>SquarePegAdapter</code> 假扮为 <code>RoundPeg</code>。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">RoundHole</span> <span class="kw">is</span>
+    <span class="kw">constructor</span> <span class="fn">RoundHole</span>(radius) { ... }
+    <span class="kw">method</span> <span class="fn">getRadius</span>() <span class="kw">is</span> <span class="cm">// Return hole radius</span>
+    <span class="kw">method</span> <span class="fn">fits</span>(peg: RoundPeg) <span class="kw">is</span>
+        <span class="kw">return</span> this.<span class="fn">getRadius</span>() >= peg.<span class="fn">getRadius</span>()
+
+<span class="kw">class</span> <span class="fn">RoundPeg</span> <span class="kw">is</span>
+    <span class="kw">constructor</span> <span class="fn">RoundPeg</span>(radius) { ... }
+    <span class="kw">method</span> <span class="fn">getRadius</span>() <span class="kw">is</span> <span class="cm">// Return peg radius</span>
+
+<span class="kw">class</span> <span class="fn">SquarePeg</span> <span class="kw">is</span>
+    <span class="kw">constructor</span> <span class="fn">SquarePeg</span>(width) { ... }
+    <span class="kw">method</span> <span class="fn">getWidth</span>() <span class="kw">is</span> <span class="cm">// Return square peg width</span>
+
+<span class="kw">class</span> <span class="fn">SquarePegAdapter</span> <span class="kw">extends</span> RoundPeg <span class="kw">is</span>
+    <span class="kw">private field</span> peg: SquarePeg
+
+    <span class="kw">constructor</span> <span class="fn">SquarePegAdapter</span>(peg: SquarePeg) <span class="kw">is</span>
+        this.peg = peg
+
+    <span class="kw">method</span> <span class="fn">getRadius</span>() <span class="kw">is</span>
+        <span class="cm">// Calculate minimum circle radius that fits the square peg</span>
+        <span class="kw">return</span> peg.<span class="fn">getWidth</span>() * Math.<span class="fn">sqrt</span>(2) / 2
+
+<span class="cm">// Client code</span>
+hole = <span class="kw">new</span> <span class="fn">RoundHole</span>(5)
+rpeg = <span class="kw">new</span> <span class="fn">RoundPeg</span>(5)
+hole.<span class="fn">fits</span>(rpeg) <span class="cm">// true</span>
+
+small_sqpeg = <span class="kw">new</span> <span class="fn">SquarePeg</span>(5)
+small_sqpeg_adapter = <span class="kw">new</span> <span class="fn">SquarePegAdapter</span>(small_sqpeg)
+hole.<span class="fn">fits</span>(small_sqpeg_adapter) <span class="cm">// true</span></code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en"><em>Single Responsibility</em>: separate interface conversion from business logic.</span><span class="cn"><em>单一职责原则</em>：将接口转换代码与业务逻辑分离。</span></li>
+        <li class="pros"><span class="en"><em>Open/Closed</em>: add new adapters without modifying existing client code.</span><span class="cn"><em>开闭原则</em>：无需修改现有客户端代码即可添加新适配器。</span></li>
+        <li class="cons"><span class="en">Increases overall code complexity. Sometimes simpler to change the service class directly.</span><span class="cn">代码整体复杂度增加。有时直接修改服务类会更简单。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-structural" id="bridge">
@@ -612,6 +974,62 @@
     <span class="en">Splits a large class or a set of closely related classes into two separate hierarchies &mdash; abstraction and implementation &mdash; which can be developed independently of each other.</span>
     <span class="cn">将一个大类或一组紧密相关的类拆分为抽象和实现两个独立的层次结构，使它们可以独立开发。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Remote controls (abstraction) and devices (implementation) can vary independently. An <code>AdvancedRemote</code> adds mute without changing any device class.</span><span class="cn">遥控器（抽象）和设备（实现）可以独立变化。<code>AdvancedRemote</code> 可以添加静音功能而不改变任何设备类。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">RemoteControl</span> <span class="kw">is</span>
+    <span class="kw">protected field</span> device: Device
+
+    <span class="kw">constructor</span> <span class="fn">RemoteControl</span>(device: Device) <span class="kw">is</span>
+        this.device = device
+
+    <span class="kw">method</span> <span class="fn">togglePower</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (device.<span class="fn">isEnabled</span>()) <span class="kw">then</span>
+            device.<span class="fn">disable</span>()
+        <span class="kw">else</span>
+            device.<span class="fn">enable</span>()
+
+    <span class="kw">method</span> <span class="fn">volumeDown</span>() <span class="kw">is</span>
+        device.<span class="fn">setVolume</span>(device.<span class="fn">getVolume</span>() - 10)
+
+    <span class="kw">method</span> <span class="fn">volumeUp</span>() <span class="kw">is</span>
+        device.<span class="fn">setVolume</span>(device.<span class="fn">getVolume</span>() + 10)
+
+<span class="kw">class</span> <span class="fn">AdvancedRemoteControl</span> <span class="kw">extends</span> RemoteControl <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">mute</span>() <span class="kw">is</span>
+        device.<span class="fn">setVolume</span>(0)
+
+<span class="kw">interface</span> <span class="fn">Device</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">isEnabled</span>()
+    <span class="kw">method</span> <span class="fn">enable</span>()
+    <span class="kw">method</span> <span class="fn">disable</span>()
+    <span class="kw">method</span> <span class="fn">getVolume</span>()
+    <span class="kw">method</span> <span class="fn">setVolume</span>(percent)
+
+<span class="kw">class</span> <span class="fn">Tv</span> <span class="kw">implements</span> Device <span class="kw">is</span> <span class="cm">// ...</span>
+<span class="kw">class</span> <span class="fn">Radio</span> <span class="kw">implements</span> Device <span class="kw">is</span> <span class="cm">// ...</span>
+
+<span class="cm">// Client code</span>
+tv = <span class="kw">new</span> <span class="fn">Tv</span>()
+remote = <span class="kw">new</span> <span class="fn">RemoteControl</span>(tv)
+remote.<span class="fn">togglePower</span>()
+
+radio = <span class="kw">new</span> <span class="fn">Radio</span>()
+remote = <span class="kw">new</span> <span class="fn">AdvancedRemoteControl</span>(radio)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Create platform-independent classes and programs.</span><span class="cn">可以创建与平台无关的类和程序。</span></li>
+        <li class="pros"><span class="en"><em>Open/Closed</em>: new abstractions and implementations don't affect each other.</span><span class="cn"><em>开闭原则</em>：新增抽象和实现部分不会相互影响。</span></li>
+        <li class="pros"><span class="en"><em>Single Responsibility</em>: high-level logic vs. platform details.</span><span class="cn"><em>单一职责原则</em>：高层逻辑与平台细节分离。</span></li>
+        <li class="cons"><span class="en">Can overcomplicate highly cohesive classes.</span><span class="cn">对高内聚的类使用该模式可能会让代码更复杂。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-structural" id="composite">
@@ -621,6 +1039,51 @@
     <span class="en">Composes objects into tree structures to represent part-whole hierarchies. Lets clients treat individual objects and compositions uniformly through a common interface.</span>
     <span class="cn">将对象组合成树形结构来表示"部分-整体"层次关系。让客户端通过公共接口统一处理单个对象和组合对象。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">A graphics editor with simple shapes (Dot, Circle) and compound shapes (CompoundGraphic) sharing the same interface.</span><span class="cn">一个图形编辑器，简单图形（Dot、Circle）和组合图形（CompoundGraphic）共享相同的接口。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">Graphic</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">move</span>(x, y)
+    <span class="kw">method</span> <span class="fn">draw</span>()
+
+<span class="kw">class</span> <span class="fn">Dot</span> <span class="kw">implements</span> Graphic <span class="kw">is</span>
+    <span class="kw">field</span> x, y
+    <span class="kw">method</span> <span class="fn">move</span>(x, y) <span class="kw">is</span>
+        this.x += x, this.y += y
+    <span class="kw">method</span> <span class="fn">draw</span>() <span class="kw">is</span>
+        <span class="cm">// Draw a dot at (X,Y)</span>
+
+<span class="kw">class</span> <span class="fn">Circle</span> <span class="kw">extends</span> Dot <span class="kw">is</span>
+    <span class="kw">field</span> radius
+    <span class="kw">method</span> <span class="fn">draw</span>() <span class="kw">is</span>
+        <span class="cm">// Draw circle at (X,Y) with radius R</span>
+
+<span class="kw">class</span> <span class="fn">CompoundGraphic</span> <span class="kw">implements</span> Graphic <span class="kw">is</span>
+    <span class="kw">field</span> children: array of Graphic
+
+    <span class="kw">method</span> <span class="fn">add</span>(child: Graphic) <span class="kw">is</span> <span class="cm">// Add to children</span>
+    <span class="kw">method</span> <span class="fn">remove</span>(child: Graphic) <span class="kw">is</span> <span class="cm">// Remove from children</span>
+
+    <span class="kw">method</span> <span class="fn">move</span>(x, y) <span class="kw">is</span>
+        <span class="kw">foreach</span> (child <span class="kw">in</span> children) <span class="kw">do</span>
+            child.<span class="fn">move</span>(x, y)
+
+    <span class="kw">method</span> <span class="fn">draw</span>() <span class="kw">is</span>
+        <span class="cm">// 1. For each child: draw it, update bounding box.</span>
+        <span class="cm">// 2. Draw dashed rectangle around bounding box.</span></code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Work with complex tree structures using polymorphism and recursion.</span><span class="cn">利用多态和递归机制方便地使用复杂树结构。</span></li>
+        <li class="pros"><span class="en"><em>Open/Closed</em>: add new elements without changing existing code.</span><span class="cn"><em>开闭原则</em>：无需更改现有代码即可添加新元素。</span></li>
+        <li class="cons"><span class="en">Hard to provide a common interface for classes with very different functionality.</span><span class="cn">对于功能差异较大的类，提供公共接口可能有困难。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-structural" id="decorator">
@@ -630,6 +1093,59 @@
     <span class="en">Attaches new behaviors to objects by placing them inside wrapper objects that contain the behaviors. A flexible alternative to subclassing for extending functionality.</span>
     <span class="cn">通过将对象放入包含行为的包装器对象中来附加新行为。是通过子类化扩展功能的灵活替代方案。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Data source decorators add encryption and compression transparently. Decorators can be stacked: <code>Encryption > Compression > FileDataSource</code>.</span><span class="cn">数据源装饰器透明地添加加密和压缩。装饰器可堆叠：<code>Encryption > Compression > FileDataSource</code>。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">DataSource</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">writeData</span>(data)
+    <span class="kw">method</span> <span class="fn">readData</span>(): data
+
+<span class="kw">class</span> <span class="fn">FileDataSource</span> <span class="kw">implements</span> DataSource <span class="kw">is</span>
+    <span class="kw">constructor</span> <span class="fn">FileDataSource</span>(filename) { ... }
+    <span class="kw">method</span> <span class="fn">writeData</span>(data) <span class="kw">is</span> <span class="cm">// Write to file</span>
+    <span class="kw">method</span> <span class="fn">readData</span>(): data <span class="kw">is</span> <span class="cm">// Read from file</span>
+
+<span class="kw">class</span> <span class="fn">DataSourceDecorator</span> <span class="kw">implements</span> DataSource <span class="kw">is</span>
+    <span class="kw">protected field</span> wrappee: DataSource
+    <span class="kw">constructor</span> <span class="fn">DataSourceDecorator</span>(source: DataSource) <span class="kw">is</span>
+        wrappee = source
+    <span class="kw">method</span> <span class="fn">writeData</span>(data) <span class="kw">is</span>
+        wrappee.<span class="fn">writeData</span>(data)
+    <span class="kw">method</span> <span class="fn">readData</span>(): data <span class="kw">is</span>
+        <span class="kw">return</span> wrappee.<span class="fn">readData</span>()
+
+<span class="kw">class</span> <span class="fn">EncryptionDecorator</span> <span class="kw">extends</span> DataSourceDecorator <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">writeData</span>(data) <span class="kw">is</span>
+        <span class="cm">// 1. Encrypt data  2. Pass to wrappee.writeData</span>
+    <span class="kw">method</span> <span class="fn">readData</span>(): data <span class="kw">is</span>
+        <span class="cm">// 1. Read via wrappee  2. Decrypt  3. Return</span>
+
+<span class="kw">class</span> <span class="fn">CompressionDecorator</span> <span class="kw">extends</span> DataSourceDecorator <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">writeData</span>(data) <span class="kw">is</span>
+        <span class="cm">// 1. Compress data  2. Pass to wrappee.writeData</span>
+    <span class="kw">method</span> <span class="fn">readData</span>(): data <span class="kw">is</span>
+        <span class="cm">// 1. Read via wrappee  2. Decompress  3. Return</span>
+
+<span class="cm">// Usage: stack decorators</span>
+source = <span class="kw">new</span> <span class="fn">FileDataSource</span>(<span class="st">"somefile.dat"</span>)
+source = <span class="kw">new</span> <span class="fn">CompressionDecorator</span>(source)
+source = <span class="kw">new</span> <span class="fn">EncryptionDecorator</span>(source)
+source.<span class="fn">writeData</span>(salaryRecords)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Extend behavior without creating new subclasses.</span><span class="cn">无需创建新子类即可扩展对象行为。</span></li>
+        <li class="pros"><span class="en">Add or remove responsibilities at runtime.</span><span class="cn">可在运行时添加或删除对象的功能。</span></li>
+        <li class="pros"><span class="en">Combine behaviors by wrapping objects in multiple decorators.</span><span class="cn">用多个装饰器封装对象来组合行为。</span></li>
+        <li class="cons"><span class="en">Hard to remove a specific wrapper from the middle of the stack.</span><span class="cn">难以从栈中间移除特定的封装器。</span></li>
+        <li class="cons"><span class="en">Hard to implement order-independent decorators.</span><span class="cn">难以实现不受装饰栈顺序影响的装饰。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-structural" id="facade">
@@ -639,6 +1155,46 @@
     <span class="en">Provides a simplified interface to a library, framework, or complex set of classes. Hides system complexity behind a single, easy-to-use class.</span>
     <span class="cn">为库、框架或复杂的类集合提供简化的接口。将系统复杂性隐藏在单个易用的类之后。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">A <code>VideoConverter</code> facade hides the complexity of a video conversion framework with dozens of classes.</span><span class="cn"><code>VideoConverter</code> 外观隐藏了包含数十个类的视频转换框架的复杂性。</span></p>
+<pre><code><span class="kw">class</span> VideoFile            <span class="cm">// ...</span>
+<span class="kw">class</span> OggCompressionCodec   <span class="cm">// ...</span>
+<span class="kw">class</span> MPEG4CompressionCodec <span class="cm">// ...</span>
+<span class="kw">class</span> CodecFactory          <span class="cm">// ...</span>
+<span class="kw">class</span> BitrateReader         <span class="cm">// ...</span>
+<span class="kw">class</span> AudioMixer            <span class="cm">// ...</span>
+
+<span class="cm">// Facade: simple interface over a complex subsystem</span>
+<span class="kw">class</span> <span class="fn">VideoConverter</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">convert</span>(filename, format): File <span class="kw">is</span>
+        file = <span class="kw">new</span> <span class="fn">VideoFile</span>(filename)
+        sourceCodec = <span class="kw">new</span> CodecFactory.<span class="fn">extract</span>(file)
+        <span class="kw">if</span> (format == <span class="st">"mp4"</span>)
+            destinationCodec = <span class="kw">new</span> <span class="fn">MPEG4CompressionCodec</span>()
+        <span class="kw">else</span>
+            destinationCodec = <span class="kw">new</span> <span class="fn">OggCompressionCodec</span>()
+        buffer = BitrateReader.<span class="fn">read</span>(filename, sourceCodec)
+        result = BitrateReader.<span class="fn">convert</span>(buffer, destinationCodec)
+        result = (<span class="kw">new</span> <span class="fn">AudioMixer</span>()).<span class="fn">fix</span>(result)
+        <span class="kw">return new</span> File(result)
+
+<span class="cm">// Client code stays simple</span>
+convertor = <span class="kw">new</span> <span class="fn">VideoConverter</span>()
+mp4 = convertor.<span class="fn">convert</span>(<span class="st">"funny-cats-video.ogg"</span>, <span class="st">"mp4"</span>)
+mp4.<span class="fn">save</span>()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Isolate your code from the complexity of a subsystem.</span><span class="cn">让代码独立于复杂子系统。</span></li>
+        <li class="cons"><span class="en">A facade can become a "god object" coupled to all classes.</span><span class="cn">外观可能成为与所有类都耦合的上帝对象。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-structural" id="flyweight">
@@ -648,6 +1204,53 @@
     <span class="en">Fits more objects into available RAM by sharing common parts of state between multiple objects instead of keeping all data in each object.</span>
     <span class="cn">通过在多个对象间共享状态的公共部分，而非在每个对象中保存所有数据，使更多对象能装入可用内存。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Rendering millions of trees on a canvas. The shared <strong>intrinsic state</strong> (name, color, texture) lives in <code>TreeType</code>; the unique <strong>extrinsic state</strong> (x, y) stays in <code>Tree</code>.</span><span class="cn">在画布上渲染数百万棵树。共享的<strong>内在状态</strong>（名称、颜色、纹理）位于 <code>TreeType</code> 中；唯一的<strong>外在状态</strong>（x, y）保留在 <code>Tree</code> 中。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">TreeType</span> <span class="kw">is</span>
+    <span class="kw">field</span> name, color, texture
+    <span class="kw">constructor</span> <span class="fn">TreeType</span>(name, color, texture) { ... }
+    <span class="kw">method</span> <span class="fn">draw</span>(canvas, x, y) <span class="kw">is</span>
+        <span class="cm">// Create bitmap with type, color, texture</span>
+        <span class="cm">// Draw bitmap on canvas at (X,Y)</span>
+
+<span class="kw">class</span> <span class="fn">TreeFactory</span> <span class="kw">is</span>
+    <span class="kw">static field</span> treeTypes: collection of tree types
+    <span class="kw">static method</span> <span class="fn">getTreeType</span>(name, color, texture) <span class="kw">is</span>
+        type = treeTypes.<span class="fn">find</span>(name, color, texture)
+        <span class="kw">if</span> (type == <span class="kw">null</span>)
+            type = <span class="kw">new</span> <span class="fn">TreeType</span>(name, color, texture)
+            treeTypes.<span class="fn">add</span>(type)
+        <span class="kw">return</span> type
+
+<span class="kw">class</span> <span class="fn">Tree</span> <span class="kw">is</span>
+    <span class="kw">field</span> x, y
+    <span class="kw">field</span> type: TreeType
+    <span class="kw">method</span> <span class="fn">draw</span>(canvas) <span class="kw">is</span>
+        type.<span class="fn">draw</span>(canvas, this.x, this.y)
+
+<span class="kw">class</span> <span class="fn">Forest</span> <span class="kw">is</span>
+    <span class="kw">field</span> trees: collection of Trees
+    <span class="kw">method</span> <span class="fn">plantTree</span>(x, y, name, color, texture) <span class="kw">is</span>
+        type = TreeFactory.<span class="fn">getTreeType</span>(name, color, texture)
+        tree = <span class="kw">new</span> <span class="fn">Tree</span>(x, y, type)
+        trees.<span class="fn">add</span>(tree)
+    <span class="kw">method</span> <span class="fn">draw</span>(canvas) <span class="kw">is</span>
+        <span class="kw">foreach</span> (tree <span class="kw">in</span> trees) <span class="kw">do</span>
+            tree.<span class="fn">draw</span>(canvas)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Save lots of RAM when dealing with many similar objects.</span><span class="cn">处理大量相似对象时可以节省大量内存。</span></li>
+        <li class="cons"><span class="en">Trading CPU for RAM &mdash; context data must be recalculated each time.</span><span class="cn">以执行速度换内存——每次调用时需重新计算情景数据。</span></li>
+        <li class="cons"><span class="en">Code becomes more complicated.</span><span class="cn">代码会变得更加复杂。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-structural" id="proxy">
@@ -657,6 +1260,61 @@
     <span class="en">Provides a substitute or placeholder for another object. Controls access to the original, performing something before or after the request reaches it (lazy loading, caching, access control, logging).</span>
     <span class="cn">为另一个对象提供替代品或占位符。控制对原始对象的访问，在请求到达前后执行某些操作（延迟加载、缓存、访问控制、日志记录）。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">A caching proxy for a third-party video service. <code>CachedTVClass</code> implements the same interface and caches results to avoid redundant downloads.</span><span class="cn">第三方视频服务的缓存代理。<code>CachedTVClass</code> 实现相同接口并缓存结果以避免重复下载。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">ThirdPartyTVLib</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">listVideos</span>()
+    <span class="kw">method</span> <span class="fn">getVideoInfo</span>(id)
+    <span class="kw">method</span> <span class="fn">downloadVideo</span>(id)
+
+<span class="kw">class</span> <span class="fn">ThirdPartyTVClass</span> <span class="kw">implements</span> ThirdPartyTVLib <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">listVideos</span>() <span class="kw">is</span> <span class="cm">// Send API request</span>
+    <span class="kw">method</span> <span class="fn">getVideoInfo</span>(id) <span class="kw">is</span> <span class="cm">// Get metadata</span>
+    <span class="kw">method</span> <span class="fn">downloadVideo</span>(id) <span class="kw">is</span> <span class="cm">// Download video file</span>
+
+<span class="kw">class</span> <span class="fn">CachedTVClass</span> <span class="kw">implements</span> ThirdPartyTVLib <span class="kw">is</span>
+    <span class="kw">private field</span> service: ThirdPartyTVLib
+    <span class="kw">private field</span> listCache, videoCache
+    <span class="kw">field</span> needReset
+
+    <span class="kw">constructor</span> <span class="fn">CachedTVClass</span>(service: ThirdPartyTVLib) <span class="kw">is</span>
+        this.service = service
+
+    <span class="kw">method</span> <span class="fn">listVideos</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (listCache == <span class="kw">null</span> || needReset)
+            listCache = service.<span class="fn">listVideos</span>()
+        <span class="kw">return</span> listCache
+
+    <span class="kw">method</span> <span class="fn">getVideoInfo</span>(id) <span class="kw">is</span>
+        <span class="kw">if</span> (videoCache == <span class="kw">null</span> || needReset)
+            videoCache = service.<span class="fn">getVideoInfo</span>(id)
+        <span class="kw">return</span> videoCache
+
+    <span class="kw">method</span> <span class="fn">downloadVideo</span>(id) <span class="kw">is</span>
+        <span class="kw">if</span> (!<span class="fn">downloadExists</span>(id) || needReset)
+            service.<span class="fn">downloadVideo</span>(id)
+
+<span class="cm">// Client code uses proxy transparently</span>
+aTVService = <span class="kw">new</span> <span class="fn">ThirdPartyTVClass</span>()
+aTVProxy = <span class="kw">new</span> <span class="fn">CachedTVClass</span>(aTVService)
+manager = <span class="kw">new</span> <span class="fn">TVManager</span>(aTVProxy)
+manager.<span class="fn">reactOnUserInput</span>()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Control service object without clients knowing.</span><span class="cn">在客户端毫无察觉的情况下控制服务对象。</span></li>
+        <li class="pros"><span class="en">Manage lifecycle; works even if service is unavailable.</span><span class="cn">管理生命周期；即使服务不可用代理也能正常工作。</span></li>
+        <li class="pros"><span class="en"><em>Open/Closed</em>: add new proxies without modifying service or client.</span><span class="cn"><em>开闭原则</em>：无需修改服务或客户端即可创建新代理。</span></li>
+        <li class="cons"><span class="en">Code complexity increases with many new classes.</span><span class="cn">需要新增许多类，代码可能会变得复杂。</span></li>
+        <li class="cons"><span class="en">Response from the service might get delayed.</span><span class="cn">服务响应可能会延迟。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <!-- ===== Behavioral Patterns ===== -->
@@ -677,6 +1335,56 @@
     <span class="en">Passes requests along a chain of handlers. Each handler decides either to process the request or to pass it to the next handler in the chain. Decouples senders from receivers.</span>
     <span class="cn">将请求沿着处理者链传递。每个处理者决定是处理请求还是将其传递给链中的下一个处理者。将发送者与接收者解耦。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Contextual help in a GUI: when F1 is pressed, the request travels up from the focused component through its containers until one shows help.</span><span class="cn">GUI 中的上下文帮助：按 F1 时，请求从当前聚焦的组件向上传递，直到某个容器显示帮助。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">ComponentWithContextualHelp</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">showHelp</span>()
+
+<span class="kw">abstract class</span> <span class="fn">Component</span> <span class="kw">implements</span> ComponentWithContextualHelp <span class="kw">is</span>
+    <span class="kw">field</span> tooltipText: string
+    <span class="kw">protected field</span> container: Container
+
+    <span class="kw">method</span> <span class="fn">showHelp</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (tooltipText != <span class="kw">null</span>)
+            <span class="cm">// Show tooltip</span>
+        <span class="kw">else</span>
+            container.<span class="fn">showHelp</span>()
+
+<span class="kw">abstract class</span> <span class="fn">Container</span> <span class="kw">extends</span> Component <span class="kw">is</span>
+    <span class="kw">protected field</span> children: array of Component
+    <span class="kw">method</span> <span class="fn">add</span>(child) <span class="kw">is</span>
+        children.<span class="fn">add</span>(child)
+        child.container = this
+
+<span class="kw">class</span> <span class="fn">Panel</span> <span class="kw">extends</span> Container <span class="kw">is</span>
+    <span class="kw">field</span> modalHelpText: string
+    <span class="kw">method</span> <span class="fn">showHelp</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (modalHelpText != <span class="kw">null</span>)
+            <span class="cm">// Show modal with help text</span>
+        <span class="kw">else</span>
+            <span class="kw">super</span>.<span class="fn">showHelp</span>()
+
+<span class="kw">class</span> <span class="fn">Dialog</span> <span class="kw">extends</span> Container <span class="kw">is</span>
+    <span class="kw">field</span> wikiPageURL: string
+    <span class="kw">method</span> <span class="fn">showHelp</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (wikiPageURL != <span class="kw">null</span>)
+            <span class="cm">// Open wiki help page</span>
+        <span class="kw">else</span>
+            <span class="kw">super</span>.<span class="fn">showHelp</span>()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Control the order of request handling.</span><span class="cn">可以控制请求处理的顺序。</span></li>
+        <li class="pros"><span class="en"><em>Single Responsibility</em> &amp; <em>Open/Closed</em>: decouple senders, add new handlers freely.</span><span class="cn"><em>单一职责</em>和<em>开闭原则</em>：解耦发送者，自由添加新处理者。</span></li>
+        <li class="cons"><span class="en">Some requests may end up unhandled.</span><span class="cn">部分请求可能未被处理。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="command">
@@ -686,6 +1394,66 @@
     <span class="en">Turns a request into a stand-alone object containing all information about the request. Supports undoable operations, queuing, and logging of requests.</span>
     <span class="cn">将请求转换为包含所有请求信息的独立对象。支持可撤销操作、排队和请求日志记录。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Text editor with undo: commands record history and can restore editor state.</span><span class="cn">带撤销功能的文本编辑器：命令记录历史并可恢复编辑器状态。</span></p>
+<pre><code><span class="kw">abstract class</span> <span class="fn">Command</span> <span class="kw">is</span>
+    <span class="kw">protected field</span> app: Application
+    <span class="kw">protected field</span> editor: Editor
+    <span class="kw">protected field</span> backup: text
+
+    <span class="kw">method</span> <span class="fn">saveBackup</span>() <span class="kw">is</span>
+        backup = editor.text
+    <span class="kw">method</span> <span class="fn">undo</span>() <span class="kw">is</span>
+        editor.text = backup
+    <span class="kw">abstract method</span> <span class="fn">execute</span>()
+
+<span class="kw">class</span> <span class="fn">CopyCommand</span> <span class="kw">extends</span> Command <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>() <span class="kw">is</span>
+        app.clipboard = editor.<span class="fn">getSelection</span>()
+        <span class="kw">return false</span>
+
+<span class="kw">class</span> <span class="fn">CutCommand</span> <span class="kw">extends</span> Command <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>() <span class="kw">is</span>
+        <span class="fn">saveBackup</span>()
+        app.clipboard = editor.<span class="fn">getSelection</span>()
+        editor.<span class="fn">deleteSelection</span>()
+        <span class="kw">return true</span>
+
+<span class="kw">class</span> <span class="fn">PasteCommand</span> <span class="kw">extends</span> Command <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>() <span class="kw">is</span>
+        <span class="fn">saveBackup</span>()
+        editor.<span class="fn">replaceSelection</span>(app.clipboard)
+        <span class="kw">return true</span>
+
+<span class="kw">class</span> <span class="fn">UndoCommand</span> <span class="kw">extends</span> Command <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>() <span class="kw">is</span>
+        app.<span class="fn">undo</span>()
+        <span class="kw">return false</span>
+
+<span class="kw">class</span> <span class="fn">Application</span> <span class="kw">is</span>
+    <span class="kw">field</span> history: CommandHistory
+    <span class="kw">method</span> <span class="fn">executeCommand</span>(command) <span class="kw">is</span>
+        <span class="kw">if</span> (command.<span class="fn">execute</span>())
+            history.<span class="fn">push</span>(command)
+    <span class="kw">method</span> <span class="fn">undo</span>() <span class="kw">is</span>
+        command = history.<span class="fn">pop</span>()
+        <span class="kw">if</span> (command != <span class="kw">null</span>)
+            command.<span class="fn">undo</span>()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en"><em>Single Responsibility</em>: decouple classes that invoke vs. perform operations.</span><span class="cn"><em>单一职责</em>：将调用操作的类与执行操作的类解耦。</span></li>
+        <li class="pros"><span class="en"><em>Open/Closed</em>: add new commands without changing existing code.</span><span class="cn"><em>开闭原则</em>：无需更改现有代码即可添加新命令。</span></li>
+        <li class="pros"><span class="en">Implement undo/redo, deferred execution, and command queuing.</span><span class="cn">实现撤销/重做、延迟执行和命令队列。</span></li>
+        <li class="cons"><span class="en">Code may become more complicated with a new layer between senders and receivers.</span><span class="cn">在发送者和接收者之间增加新的层次，代码可能变得更复杂。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="iterator">
@@ -695,6 +1463,41 @@
     <span class="en">Traverses elements of a collection without exposing its underlying representation (list, stack, tree, etc.). Provides a uniform way to access elements regardless of data structure.</span>
     <span class="cn">在不暴露集合底层表现形式（列表、栈、树等）的情况下遍历集合中的所有元素。提供统一的元素访问方式，与数据结构无关。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Social network iterators: traverse friends or coworkers on different platforms (WeChat, LinkedIn) through a unified interface.</span><span class="cn">社交网络迭代器：通过统一接口遍历不同平台（微信、LinkedIn）上的好友或同事。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">ProfileIterator</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">getNext</span>(): Profile
+    <span class="kw">method</span> <span class="fn">hasMore</span>(): bool
+
+<span class="kw">interface</span> <span class="fn">SocialNetwork</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">createFriendsIterator</span>(profileId): ProfileIterator
+    <span class="kw">method</span> <span class="fn">createCoworkersIterator</span>(profileId): ProfileIterator
+
+<span class="kw">class</span> <span class="fn">WeChat</span> <span class="kw">implements</span> SocialNetwork <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">createFriendsIterator</span>(profileId) <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">WeChatIterator</span>(this, profileId, <span class="st">"friends"</span>)
+    <span class="kw">method</span> <span class="fn">createCoworkersIterator</span>(profileId) <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">WeChatIterator</span>(this, profileId, <span class="st">"coworkers"</span>)
+
+<span class="kw">class</span> <span class="fn">SocialSpammer</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">send</span>(iterator: ProfileIterator, message) <span class="kw">is</span>
+        <span class="kw">while</span> (iterator.<span class="fn">hasMore</span>()) <span class="kw">do</span>
+            profile = iterator.<span class="fn">getNext</span>()
+            System.<span class="fn">sendEmail</span>(profile.<span class="fn">getEmail</span>(), message)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en"><em>Single Responsibility</em> &amp; <em>Open/Closed</em>: clean traversal code, new iterators without changes.</span><span class="cn"><em>单一职责</em>和<em>开闭原则</em>：整洁的遍历代码，无需修改即可添加新迭代器。</span></li>
+        <li class="pros"><span class="en">Iterate in parallel; pause and resume traversal.</span><span class="cn">可并行遍历同一集合；可暂停并在需要时继续。</span></li>
+        <li class="cons"><span class="en">Overkill for simple collections.</span><span class="cn">对于简单集合可能矫枉过正。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="mediator">
@@ -704,6 +1507,52 @@
     <span class="en">Reduces chaotic dependencies between objects by restricting direct communications and forcing them to collaborate only via a mediator object. Components become independent of each other.</span>
     <span class="cn">通过限制对象间的直接通信并强制它们仅通过中介者对象协作，减少对象间的混乱依赖。组件变得彼此独立。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">An authentication dialog acts as the mediator between UI components (buttons, textboxes, checkboxes). Components notify the dialog, which coordinates the response.</span><span class="cn">认证对话框充当 UI 组件（按钮、文本框、复选框）之间的中介者。组件通知对话框，由对话框协调响应。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">Mediator</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">notify</span>(sender: Component, event: string)
+
+<span class="kw">class</span> <span class="fn">AuthenticationDialog</span> <span class="kw">implements</span> Mediator <span class="kw">is</span>
+    <span class="kw">private field</span> loginOrRegisterChkBx: Checkbox
+    <span class="kw">private field</span> loginUsername, loginPassword: Textbox
+    <span class="kw">private field</span> okBtn, cancelBtn: Button
+
+    <span class="kw">method</span> <span class="fn">notify</span>(sender, event) <span class="kw">is</span>
+        <span class="kw">if</span> (sender == loginOrRegisterChkBx <span class="kw">and</span> event == <span class="st">"check"</span>)
+            <span class="kw">if</span> (loginOrRegisterChkBx.checked)
+                title = <span class="st">"Log in"</span>
+                <span class="cm">// Show login form, hide register form</span>
+            <span class="kw">else</span>
+                title = <span class="st">"Register"</span>
+                <span class="cm">// Show register form, hide login form</span>
+
+        <span class="kw">if</span> (sender == okBtn <span class="kw">and</span> event == <span class="st">"click"</span>)
+            <span class="kw">if</span> (loginOrRegister.checked)
+                <span class="cm">// Try to find user with login credentials</span>
+            <span class="kw">else</span>
+                <span class="cm">// Create account using registration fields</span>
+
+<span class="kw">class</span> <span class="fn">Component</span> <span class="kw">is</span>
+    <span class="kw">field</span> dialog: Mediator
+    <span class="kw">method</span> <span class="fn">click</span>() <span class="kw">is</span>
+        dialog.<span class="fn">notify</span>(this, <span class="st">"click"</span>)
+    <span class="kw">method</span> <span class="fn">keypress</span>() <span class="kw">is</span>
+        dialog.<span class="fn">notify</span>(this, <span class="st">"keypress"</span>)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en"><em>Single Responsibility</em>: extract communication into one place.</span><span class="cn"><em>单一职责原则</em>：将多组件交流抽取到同一位置。</span></li>
+        <li class="pros"><span class="en"><em>Open/Closed</em>: add new mediators without modifying components.</span><span class="cn"><em>开闭原则</em>：无需修改组件即可增加新的中介者。</span></li>
+        <li class="pros"><span class="en">Reduce coupling; reuse components more easily.</span><span class="cn">减轻耦合；更方便地复用组件。</span></li>
+        <li class="cons"><span class="en">Mediator can evolve into a God Object over time.</span><span class="cn">中介者可能随时间演化为上帝对象。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="memento">
@@ -713,6 +1562,57 @@
     <span class="en">Saves and restores the previous state of an object without revealing the details of its implementation. Enables undo/redo functionality without violating encapsulation.</span>
     <span class="cn">在不暴露对象实现细节的情况下保存和恢复对象之前的状态。在不违反封装的前提下实现撤销/重做功能。</span>
   </p>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">A text editor creates snapshots of its state before changes, enabling undo via a history stack of Mementos.</span><span class="cn">文本编辑器在修改前创建状态快照，通过备忘录历史栈实现撤销。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">Editor</span> <span class="kw">is</span>
+    <span class="kw">private field</span> text, curX, curY, selectionWidth
+
+    <span class="kw">method</span> <span class="fn">setText</span>(text) <span class="kw">is</span>
+        this.text = text
+
+    <span class="kw">method</span> <span class="fn">setCursor</span>(x, y) <span class="kw">is</span>
+        this.curX = x
+        this.curY = y
+
+    <span class="kw">method</span> <span class="fn">createSnapshot</span>(): Snapshot <span class="kw">is</span>
+        <span class="kw">return new</span> <span class="fn">Snapshot</span>(this, text, curX, curY, selectionWidth)
+
+<span class="kw">class</span> <span class="fn">Snapshot</span> <span class="kw">is</span>
+    <span class="kw">private field</span> editor: Editor
+    <span class="kw">private field</span> text, curX, curY, selectionWidth
+
+    <span class="kw">constructor</span> <span class="fn">Snapshot</span>(editor, text, curX, curY, selectionWidth) <span class="kw">is</span>
+        <span class="cm">// Save all fields</span>
+
+    <span class="kw">method</span> <span class="fn">restore</span>() <span class="kw">is</span>
+        editor.<span class="fn">setText</span>(text)
+        editor.<span class="fn">setCursor</span>(curX, curY)
+        editor.selectionWidth = selectionWidth
+
+<span class="kw">class</span> <span class="fn">Command</span> <span class="kw">is</span>
+    <span class="kw">private field</span> backup: Snapshot
+
+    <span class="kw">method</span> <span class="fn">makeBackup</span>() <span class="kw">is</span>
+        backup = editor.<span class="fn">createSnapshot</span>()
+
+    <span class="kw">method</span> <span class="fn">undo</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (backup != <span class="kw">null</span>)
+            backup.<span class="fn">restore</span>()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">Produce snapshots without violating encapsulation.</span><span class="cn">在不违反封装的前提下生成快照。</span></li>
+        <li class="pros"><span class="en">Simplify originator code by letting caretaker maintain history.</span><span class="cn">让负责人维护历史记录，简化原发器代码。</span></li>
+        <li class="cons"><span class="en">High RAM consumption if clients create mementos too often.</span><span class="cn">如果客户端频繁创建备忘录，内存消耗会很高。</span></li>
+        <li class="cons"><span class="en">Caretakers must track originator lifecycle to destroy obsolete mementos.</span><span class="cn">负责人必须跟踪原发器的生命周期以销毁过期的备忘录。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="observer">
@@ -722,6 +1622,84 @@
     <span class="en">Defines a subscription mechanism to notify multiple objects about any events that happen to the object they're observing. The basis for the event-driven architecture.</span>
     <span class="cn">定义一种订阅机制，以便在被观察对象发生事件时通知多个其他对象。事件驱动架构的基础。</span>
   </p>
+  <details>
+    <summary><span class="en">Problem &amp; Solution</span><span class="cn">问题与解决方案</span></summary>
+    <div class="details-body">
+      <p><span class="en">Imagine <strong>Customer</strong> and <strong>Store</strong> objects. Customers want to know when a product arrives. They could visit daily (wasteful), or the store could spam everyone (annoying). Observer adds a <strong>subscription mechanism</strong> to the publisher: 1) a list storing subscriber references, 2) methods to add/remove subscribers. When an event occurs, the publisher traverses the list and calls each subscriber's notification method via a common interface.</span></p>
+      <p><span class="cn">假设有<strong>顾客</strong>和<strong>商店</strong>对象。顾客想知道产品何时到货。他们可以每天去查看（浪费时间），或商店通知所有人（打扰）。观察者模式为发布者添加<strong>订阅机制</strong>：1）存储订阅者引用的列表，2）添加/删除订阅者的方法。事件发生时，发布者遍历列表并通过通用接口调用每个订阅者的通知方法。</span></p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">A text editor notifies other service objects (logging, email) about state changes via an event manager.</span></p>
+      <p><span class="cn">文本编辑器通过事件管理器将状态变化通知给其他服务对象（日志、邮件提醒）。</span></p>
+<pre><code><span class="cm">// Publisher base class with subscription management</span>
+<span class="kw">class</span> <span class="fn">EventManager</span> <span class="kw">is</span>
+    <span class="kw">private field</span> listeners: hash map of event types and listeners
+
+    <span class="kw">method</span> <span class="fn">subscribe</span>(eventType, listener) <span class="kw">is</span>
+        listeners.add(eventType, listener)
+
+    <span class="kw">method</span> <span class="fn">unsubscribe</span>(eventType, listener) <span class="kw">is</span>
+        listeners.remove(eventType, listener)
+
+    <span class="kw">method</span> <span class="fn">notify</span>(eventType, data) <span class="kw">is</span>
+        <span class="kw">foreach</span> (listener <span class="kw">in</span> listeners.of(eventType)) <span class="kw">do</span>
+            listener.update(data)
+
+<span class="cm">// Concrete publisher</span>
+<span class="kw">class</span> <span class="fn">Editor</span> <span class="kw">is</span>
+    <span class="kw">public field</span> events: EventManager
+    <span class="kw">private field</span> file: File
+
+    <span class="kw">constructor</span> <span class="fn">Editor</span>() <span class="kw">is</span>
+        events = <span class="kw">new</span> EventManager()
+
+    <span class="kw">method</span> <span class="fn">openFile</span>(path) <span class="kw">is</span>
+        <span class="kw">this</span>.file = <span class="kw">new</span> File(path)
+        events.notify(<span class="st">"open"</span>, file.name)
+
+    <span class="kw">method</span> <span class="fn">saveFile</span>() <span class="kw">is</span>
+        file.write()
+        events.notify(<span class="st">"save"</span>, file.name)
+
+<span class="cm">// Subscriber interface</span>
+<span class="kw">interface</span> <span class="fn">EventListener</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">update</span>(filename)
+
+<span class="kw">class</span> <span class="fn">LoggingListener</span> <span class="kw">implements</span> EventListener <span class="kw">is</span>
+    <span class="kw">private field</span> log: File, message: string
+    <span class="kw">method</span> <span class="fn">update</span>(filename) <span class="kw">is</span>
+        log.write(replace(<span class="st">'%s'</span>, filename, message))
+
+<span class="kw">class</span> <span class="fn">EmailAlertsListener</span> <span class="kw">implements</span> EventListener <span class="kw">is</span>
+    <span class="kw">private field</span> email: string, message: string
+    <span class="kw">method</span> <span class="fn">update</span>(filename) <span class="kw">is</span>
+        system.email(email, replace(<span class="st">'%s'</span>, filename, message))
+
+<span class="cm">// Client configures publishers and subscribers</span>
+<span class="kw">class</span> <span class="fn">Application</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">config</span>() <span class="kw">is</span>
+        editor = <span class="kw">new</span> Editor()
+        logger = <span class="kw">new</span> LoggingListener(<span class="st">"/path/to/log.txt"</span>,
+            <span class="st">"Someone opened: %s"</span>)
+        editor.events.subscribe(<span class="st">"open"</span>, logger)
+        emailAlerts = <span class="kw">new</span> EmailAlertsListener(<span class="st">"admin@example.com"</span>,
+            <span class="st">"Someone changed: %s"</span>)
+        editor.events.subscribe(<span class="st">"save"</span>, emailAlerts)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en"><strong>Open/Closed Principle.</strong> Introduce new subscriber classes without changing the publisher.</span><span class="cn"><strong>开闭原则。</strong>无需修改发布者代码就能引入新的订阅者类。</span></li>
+        <li class="pros"><span class="en">You can establish relations between objects at runtime.</span><span class="cn">可以在运行时建立对象之间的联系。</span></li>
+        <li class="cons"><span class="en">Subscribers are notified in random order.</span><span class="cn">订阅者的通知顺序是随机的。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="state">
@@ -731,6 +1709,88 @@
     <span class="en">Lets an object alter its behavior when its internal state changes. It appears as if the object changed its class. An alternative to large state-based conditionals.</span>
     <span class="cn">当对象的内部状态改变时改变其行为，看起来就像对象改变了其类。是大型基于状态的条件语句的替代方案。</span>
   </p>
+  <details>
+    <summary><span class="en">Problem &amp; Solution</span><span class="cn">问题与解决方案</span></summary>
+    <div class="details-body">
+      <p><span class="en">The State pattern is closely related to <strong>Finite State Machines</strong>. A program can be in a limited number of states, behaving differently in each. For example, a <code>Document</code> can be in Draft, Moderation, or Published state &mdash; the <code>publish()</code> method behaves differently in each. Instead of bloated <code>switch</code> statements, the pattern suggests creating <strong>separate classes for each state</strong>, with the original object (context) delegating work to the current state object.</span></p>
+      <p><span class="cn">状态模式与<strong>有限状态机</strong>概念紧密相关。程序在任意时刻仅可处于几种有限的状态中，每种状态下行为不同。例如，<code>Document</code>可处于草稿、审阅中或已发布状态——<code>publish()</code>方法在每种状态下行为不同。与其使用臃肿的<code>switch</code>语句，不如为每种状态<strong>创建独立的类</strong>，原始对象（上下文）将工作委派给当前的状态对象。</span></p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">An audio player whose controls behave differently depending on the current playback state (Locked, Ready, Playing).</span></p>
+      <p><span class="cn">一个音频播放器，其控件根据当前回放状态（锁定、就绪、播放中）完成不同行为。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">AudioPlayer</span> <span class="kw">is</span>
+    <span class="kw">field</span> state: State
+    <span class="kw">field</span> UI, volume, playlist, currentSong
+
+    <span class="kw">constructor</span> <span class="fn">AudioPlayer</span>() <span class="kw">is</span>
+        <span class="kw">this</span>.state = <span class="kw">new</span> ReadyState(<span class="kw">this</span>)
+        UI = <span class="kw">new</span> UserInterface()
+        UI.lockButton.onClick(<span class="kw">this</span>.clickLock)
+        UI.playButton.onClick(<span class="kw">this</span>.clickPlay)
+        UI.nextButton.onClick(<span class="kw">this</span>.clickNext)
+        UI.prevButton.onClick(<span class="kw">this</span>.clickPrevious)
+
+    <span class="kw">method</span> <span class="fn">changeState</span>(state: State) <span class="kw">is</span>
+        <span class="kw">this</span>.state = state
+
+    <span class="cm">// UI methods delegate to current state</span>
+    <span class="kw">method</span> <span class="fn">clickLock</span>() <span class="kw">is</span>  state.clickLock()
+    <span class="kw">method</span> <span class="fn">clickPlay</span>() <span class="kw">is</span>  state.clickPlay()
+    <span class="kw">method</span> <span class="fn">clickNext</span>() <span class="kw">is</span>  state.clickNext()
+    <span class="kw">method</span> <span class="fn">clickPrevious</span>() <span class="kw">is</span>  state.clickPrevious()
+
+<span class="kw">abstract class</span> <span class="fn">State</span> <span class="kw">is</span>
+    <span class="kw">protected field</span> player: AudioPlayer
+    <span class="kw">constructor</span> <span class="fn">State</span>(player) <span class="kw">is</span>
+        <span class="kw">this</span>.player = player
+    <span class="kw">abstract method</span> clickLock()
+    <span class="kw">abstract method</span> clickPlay()
+    <span class="kw">abstract method</span> clickNext()
+    <span class="kw">abstract method</span> clickPrevious()
+
+<span class="kw">class</span> <span class="fn">LockedState</span> <span class="kw">extends</span> State <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">clickLock</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (player.playing)
+            player.changeState(<span class="kw">new</span> PlayingState(player))
+        <span class="kw">else</span>
+            player.changeState(<span class="kw">new</span> ReadyState(player))
+    <span class="kw">method</span> <span class="fn">clickPlay</span>() <span class="kw">is</span>  <span class="cm">// locked, do nothing</span>
+    <span class="kw">method</span> <span class="fn">clickNext</span>() <span class="kw">is</span>  <span class="cm">// locked, do nothing</span>
+    <span class="kw">method</span> <span class="fn">clickPrevious</span>() <span class="kw">is</span>  <span class="cm">// locked, do nothing</span>
+
+<span class="kw">class</span> <span class="fn">ReadyState</span> <span class="kw">extends</span> State <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">clickLock</span>() <span class="kw">is</span>
+        player.changeState(<span class="kw">new</span> LockedState(player))
+    <span class="kw">method</span> <span class="fn">clickPlay</span>() <span class="kw">is</span>
+        player.startPlayback()
+        player.changeState(<span class="kw">new</span> PlayingState(player))
+    <span class="kw">method</span> <span class="fn">clickNext</span>() <span class="kw">is</span>  player.nextSong()
+    <span class="kw">method</span> <span class="fn">clickPrevious</span>() <span class="kw">is</span>  player.previousSong()
+
+<span class="kw">class</span> <span class="fn">PlayingState</span> <span class="kw">extends</span> State <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">clickLock</span>() <span class="kw">is</span>
+        player.changeState(<span class="kw">new</span> LockedState(player))
+    <span class="kw">method</span> <span class="fn">clickPlay</span>() <span class="kw">is</span>
+        player.stopPlayback()
+        player.changeState(<span class="kw">new</span> ReadyState(player))
+    <span class="kw">method</span> <span class="fn">clickNext</span>() <span class="kw">is</span>  player.nextSong()
+    <span class="kw">method</span> <span class="fn">clickPrevious</span>() <span class="kw">is</span>  player.previousSong()</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en"><strong>Single Responsibility.</strong> Organize state-specific code into separate classes.</span><span class="cn"><strong>单一职责原则。</strong>将特定于状态的代码组织到独立的类中。</span></li>
+        <li class="pros"><span class="en"><strong>Open/Closed.</strong> Introduce new states without changing existing state classes or context.</span><span class="cn"><strong>开闭原则。</strong>无需修改现有状态类或上下文就能引入新状态。</span></li>
+        <li class="pros"><span class="en">Simplify context code by eliminating bulky state machine conditionals.</span><span class="cn">通过消除臃肿的状态机条件语句来简化上下文代码。</span></li>
+        <li class="cons"><span class="en">Can be overkill if a state machine has only a few states or rarely changes.</span><span class="cn">如果状态机只有很少的状态或很少变化，应用该模式可能矫枉过正。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="strategy">
@@ -740,6 +1800,70 @@
     <span class="en">Defines a family of algorithms, encapsulates each one, and makes them interchangeable. Lets the algorithm vary independently from clients that use it.</span>
     <span class="cn">定义一系列算法，将每个算法封装起来，并使它们可以互换。让算法独立于使用它的客户端而变化。</span>
   </p>
+  <details>
+    <summary><span class="en">Problem &amp; Solution</span><span class="cn">问题与解决方案</span></summary>
+    <div class="details-body">
+      <p><span class="en">Imagine building a navigation app. Initially it only supports driving routes. Then you add walking, public transport, cycling, sightseeing&hellip; Each new algorithm doubles the main class size, and any change risks breaking existing code. Strategy suggests extracting each algorithm into its own class. The <strong>context</strong> holds a reference to a strategy object and delegates work to it via a common interface, letting you swap algorithms at runtime.</span></p>
+      <p><span class="cn">想象开发一款导航应用。最初只支持驾车路线，后来添加步行、公交、骑行、观光……每增加一个算法，主类体积就翻倍，任何修改都有破坏已有代码的风险。策略模式建议将每个算法提取到独立的类中。<strong>上下文</strong>持有策略对象的引用，并通过通用接口将工作委派给它，从而可在运行时替换算法。</span></p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">The context uses multiple strategies to execute different arithmetic operations.</span></p>
+      <p><span class="cn">上下文使用多个策略来执行不同的计算操作。</span></p>
+<pre><code><span class="kw">interface</span> <span class="fn">Strategy</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>(a, b)
+
+<span class="kw">class</span> <span class="fn">ConcreteStrategyAdd</span> <span class="kw">implements</span> Strategy <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>(a, b) <span class="kw">is</span>
+        <span class="kw">return</span> a + b
+
+<span class="kw">class</span> <span class="fn">ConcreteStrategySubtract</span> <span class="kw">implements</span> Strategy <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>(a, b) <span class="kw">is</span>
+        <span class="kw">return</span> a - b
+
+<span class="kw">class</span> <span class="fn">ConcreteStrategyMultiply</span> <span class="kw">implements</span> Strategy <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">execute</span>(a, b) <span class="kw">is</span>
+        <span class="kw">return</span> a * b
+
+<span class="cm">// Context doesn't know which strategy it uses</span>
+<span class="kw">class</span> <span class="fn">Context</span> <span class="kw">is</span>
+    <span class="kw">private</span> strategy: Strategy
+
+    <span class="kw">method</span> <span class="fn">setStrategy</span>(Strategy strategy) <span class="kw">is</span>
+        <span class="kw">this</span>.strategy = strategy
+
+    <span class="kw">method</span> <span class="fn">executeStrategy</span>(a, b) <span class="kw">is</span>
+        <span class="kw">return</span> strategy.execute(a, b)
+
+<span class="cm">// Client picks and passes the strategy</span>
+<span class="kw">class</span> <span class="fn">ExampleApplication</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">main</span>() <span class="kw">is</span>
+        <span class="cm">// Create context, read numbers &amp; action from user</span>
+        <span class="kw">if</span> (action == addition) <span class="kw">then</span>
+            context.setStrategy(<span class="kw">new</span> ConcreteStrategyAdd())
+        <span class="kw">if</span> (action == subtraction) <span class="kw">then</span>
+            context.setStrategy(<span class="kw">new</span> ConcreteStrategySubtract())
+        <span class="kw">if</span> (action == multiplication) <span class="kw">then</span>
+            context.setStrategy(<span class="kw">new</span> ConcreteStrategyMultiply())
+
+        result = context.executeStrategy(firstNumber, secondNumber)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">You can swap algorithms inside an object at runtime.</span><span class="cn">可以在运行时切换对象内的算法。</span></li>
+        <li class="pros"><span class="en">You can isolate implementation details of an algorithm from the code that uses it.</span><span class="cn">可以将算法的实现细节与使用代码隔离开来。</span></li>
+        <li class="pros"><span class="en">You can replace inheritance with composition.</span><span class="cn">可以使用组合来代替继承。</span></li>
+        <li class="pros"><span class="en"><strong>Open/Closed Principle.</strong> Introduce new strategies without modifying the context.</span><span class="cn"><strong>开闭原则。</strong>无需修改上下文就能引入新的策略。</span></li>
+        <li class="cons"><span class="en">If algorithms rarely change, no reason to overcomplicate with extra classes &amp; interfaces.</span><span class="cn">如果算法极少发生改变，引入新的类和接口会让程序过于复杂。</span></li>
+        <li class="cons"><span class="en">Clients must be aware of the differences between strategies to pick the right one.</span><span class="cn">客户端必须知晓策略间的不同才能选择合适的策略。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="template-method">
@@ -749,6 +1873,82 @@
     <span class="en">Defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing the algorithm's overall structure.</span>
     <span class="cn">在基类中定义算法的骨架，允许子类在不改变算法整体结构的情况下重写特定步骤。</span>
   </p>
+  <details>
+    <summary><span class="en">Problem &amp; Solution</span><span class="cn">问题与解决方案</span></summary>
+    <div class="details-body">
+      <p><span class="en">Imagine building a data-mining app that processes DOC, CSV, and PDF files. The three parsing classes contain much duplicate code &mdash; data processing and analysis logic is nearly identical, only the file-specific parts differ. Template Method suggests <strong>decomposing the algorithm into steps</strong>, making some abstract (subclasses must implement) and others with default implementations. A &ldquo;hook&rdquo; is an optional step with an empty body &mdash; subclasses can override it for extra extension points.</span></p>
+      <p><span class="cn">假设你要开发一款处理DOC、CSV和PDF文件的数据挖掘应用。三个解析类包含大量重复代码——数据处理和分析逻辑几乎相同，只有文件特定部分不同。模板方法建议<strong>将算法分解为一系列步骤</strong>，某些步骤是抽象的（子类必须实现），其他步骤有默认实现。"钩子"是内容为空的可选步骤——子类可以重写它以获得额外的扩展点。</span></p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">A strategy game AI framework where different races (Orcs, Monsters) override specific steps of the game turn algorithm.</span></p>
+      <p><span class="cn">一款策略游戏AI框架，不同种族（兽人、怪物）重写游戏回合算法的特定步骤。</span></p>
+<pre><code><span class="kw">class</span> <span class="fn">GameAI</span> <span class="kw">is</span>
+    <span class="cm">// Template method defines the algorithm skeleton</span>
+    <span class="kw">method</span> <span class="fn">turn</span>() <span class="kw">is</span>
+        collectResources()
+        buildStructures()
+        buildUnits()
+        attack()
+
+    <span class="cm">// Some steps have default implementations</span>
+    <span class="kw">method</span> <span class="fn">collectResources</span>() <span class="kw">is</span>
+        <span class="kw">foreach</span> (s <span class="kw">in this</span>.builtStructures) <span class="kw">do</span>
+            s.collect()
+
+    <span class="cm">// Some steps are abstract</span>
+    <span class="kw">abstract method</span> <span class="fn">buildStructures</span>()
+    <span class="kw">abstract method</span> <span class="fn">buildUnits</span>()
+
+    <span class="kw">method</span> <span class="fn">attack</span>() <span class="kw">is</span>
+        enemy = closestEnemy()
+        <span class="kw">if</span> (enemy == <span class="kw">null</span>)
+            sendScouts(map.center)
+        <span class="kw">else</span>
+            sendWarriors(enemy.position)
+
+    <span class="kw">abstract method</span> <span class="fn">sendScouts</span>(position)
+    <span class="kw">abstract method</span> <span class="fn">sendWarriors</span>(position)
+
+<span class="cm">// Concrete class implements all abstract steps</span>
+<span class="kw">class</span> <span class="fn">OrcsAI</span> <span class="kw">extends</span> GameAI <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">buildStructures</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (there are some resources) <span class="kw">then</span>
+            <span class="cm">// Build farms, then barns, then fortress</span>
+    <span class="kw">method</span> <span class="fn">buildUnits</span>() <span class="kw">is</span>
+        <span class="kw">if</span> (there are plenty of resources) <span class="kw">then</span>
+            <span class="kw">if</span> (there are no scouts)
+                <span class="cm">// Build peon, add to scouts group</span>
+            <span class="kw">else</span>
+                <span class="cm">// Build grunt, add to warriors group</span>
+    <span class="kw">method</span> <span class="fn">sendScouts</span>(position) <span class="kw">is</span>
+        <span class="kw">if</span> (scouts.length > 0) <span class="kw">then</span>
+            <span class="cm">// Send scouts group to position</span>
+    <span class="kw">method</span> <span class="fn">sendWarriors</span>(position) <span class="kw">is</span>
+        <span class="kw">if</span> (warriors.length > 5) <span class="kw">then</span>
+            <span class="cm">// Send warriors group to position</span>
+
+<span class="cm">// Subclasses can override default operations too</span>
+<span class="kw">class</span> <span class="fn">MonstersAI</span> <span class="kw">extends</span> GameAI <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">collectResources</span>() <span class="kw">is</span>  <span class="cm">// Monsters don't collect</span>
+    <span class="kw">method</span> <span class="fn">buildStructures</span>() <span class="kw">is</span>  <span class="cm">// Monsters don't build</span>
+    <span class="kw">method</span> <span class="fn">buildUnits</span>() <span class="kw">is</span>  <span class="cm">// Monsters don't build units</span></code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en">You can let clients override only certain parts of a large algorithm, making them less affected by changes to other parts.</span><span class="cn">可仅允许客户端重写大型算法的特定部分，使算法其他部分修改对其影响减小。</span></li>
+        <li class="pros"><span class="en">You can pull duplicate code into a superclass.</span><span class="cn">可将重复代码提取到超类中。</span></li>
+        <li class="cons"><span class="en">Some clients may be limited by the provided skeleton of the algorithm.</span><span class="cn">部分客户端可能会受到算法框架的限制。</span></li>
+        <li class="cons"><span class="en">Suppressing a default step via subclass may violate Liskov Substitution Principle.</span><span class="cn">通过子类抑制默认步骤实现可能会违反里氏替换原则。</span></li>
+        <li class="cons"><span class="en">The more steps, the harder it is to maintain.</span><span class="cn">模板方法中的步骤越多，维护工作越困难。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="pattern-entry cat-behavioral" id="visitor">
@@ -758,6 +1958,79 @@
     <span class="en">Separates algorithms from the objects on which they operate by moving each algorithm into a separate class called a visitor. Lets you add new operations without modifying existing classes.</span>
     <span class="cn">将算法与其所作用的对象分离，把每个算法移入称为"访问者"的独立类中。让你在不修改现有类的情况下添加新操作。</span>
   </p>
+  <details>
+    <summary><span class="en">Problem &amp; Solution</span><span class="cn">问题与解决方案</span></summary>
+    <div class="details-body">
+      <p><span class="en">You have a geographic graph with City, Industry, SightSeeing nodes. You need to export it to XML, but the architect refuses to modify stable node classes. Visitor places the new behavior into a separate class. Using <strong>double dispatch</strong>, each element &ldquo;accepts&rdquo; a visitor and calls the correct visitor method on itself &mdash; <code>node.accept(visitor)</code> internally calls <code>visitor.visitCity(this)</code>. This lets you add new operations (XML export, statistics, etc.) without touching the element hierarchy.</span></p>
+      <p><span class="cn">你有一个包含城市、工业区、旅游景点节点的地理图像。你需要将其导出为XML，但架构师拒绝修改稳定的节点类。访问者模式将新行为放入独立的类中。通过<strong>双分派</strong>技巧，每个元素"接收"一个访问者并在自身上调用正确的访问者方法——<code>node.accept(visitor)</code>内部调用<code>visitor.visitCity(this)</code>。这让你在不修改元素层次结构的情况下添加新操作（XML导出、统计等）。</span></p>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pseudocode</span><span class="cn">伪代码</span></summary>
+    <div class="details-body">
+      <p><span class="en">Adding XML export support to a geometric shape hierarchy using double dispatch.</span></p>
+      <p><span class="cn">使用双分派技巧为几何图形层次结构添加XML导出支持。</span></p>
+<pre><code><span class="cm">// Element interface declares an accept method</span>
+<span class="kw">interface</span> <span class="fn">Shape</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">move</span>(x, y)
+    <span class="kw">method</span> <span class="fn">draw</span>()
+    <span class="kw">method</span> <span class="fn">accept</span>(v: Visitor)
+
+<span class="kw">class</span> <span class="fn">Dot</span> <span class="kw">implements</span> Shape <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">accept</span>(v: Visitor) <span class="kw">is</span>
+        v.visitDot(<span class="kw">this</span>)
+
+<span class="kw">class</span> <span class="fn">Circle</span> <span class="kw">implements</span> Shape <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">accept</span>(v: Visitor) <span class="kw">is</span>
+        v.visitCircle(<span class="kw">this</span>)
+
+<span class="kw">class</span> <span class="fn">Rectangle</span> <span class="kw">implements</span> Shape <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">accept</span>(v: Visitor) <span class="kw">is</span>
+        v.visitRectangle(<span class="kw">this</span>)
+
+<span class="kw">class</span> <span class="fn">CompoundShape</span> <span class="kw">implements</span> Shape <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">accept</span>(v: Visitor) <span class="kw">is</span>
+        v.visitCompoundShape(<span class="kw">this</span>)
+
+<span class="cm">// Visitor interface with a method per element type</span>
+<span class="kw">interface</span> <span class="fn">Visitor</span> <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">visitDot</span>(d: Dot)
+    <span class="kw">method</span> <span class="fn">visitCircle</span>(c: Circle)
+    <span class="kw">method</span> <span class="fn">visitRectangle</span>(r: Rectangle)
+    <span class="kw">method</span> <span class="fn">visitCompoundShape</span>(cs: CompoundShape)
+
+<span class="cm">// Concrete visitor implements the operation for all element types</span>
+<span class="kw">class</span> <span class="fn">XMLExportVisitor</span> <span class="kw">implements</span> Visitor <span class="kw">is</span>
+    <span class="kw">method</span> <span class="fn">visitDot</span>(d: Dot) <span class="kw">is</span>
+        <span class="cm">// Export dot's ID and center coordinates</span>
+    <span class="kw">method</span> <span class="fn">visitCircle</span>(c: Circle) <span class="kw">is</span>
+        <span class="cm">// Export circle's ID, center, and radius</span>
+    <span class="kw">method</span> <span class="fn">visitRectangle</span>(r: Rectangle) <span class="kw">is</span>
+        <span class="cm">// Export rectangle's ID, top-left, width, height</span>
+    <span class="kw">method</span> <span class="fn">visitCompoundShape</span>(cs: CompoundShape) <span class="kw">is</span>
+        <span class="cm">// Export shape's ID and list of children IDs</span>
+
+<span class="cm">// Client code runs visitor across all shapes</span>
+<span class="kw">class</span> <span class="fn">Application</span> <span class="kw">is</span>
+    <span class="kw">field</span> allShapes: array of Shapes
+    <span class="kw">method</span> <span class="fn">export</span>() <span class="kw">is</span>
+        exportVisitor = <span class="kw">new</span> XMLExportVisitor()
+        <span class="kw">foreach</span> (shape <span class="kw">in</span> allShapes) <span class="kw">do</span>
+            shape.accept(exportVisitor)</code></pre>
+    </div>
+  </details>
+  <details>
+    <summary><span class="en">Pros &amp; Cons</span><span class="cn">优缺点</span></summary>
+    <div class="details-body">
+      <ul>
+        <li class="pros"><span class="en"><strong>Open/Closed Principle.</strong> Introduce new behaviors for different classes without modifying them.</span><span class="cn"><strong>开闭原则。</strong>可以引入在不同类对象上执行的新行为，且无需修改这些类。</span></li>
+        <li class="pros"><span class="en"><strong>Single Responsibility.</strong> Move multiple versions of the same behavior into one class.</span><span class="cn"><strong>单一职责原则。</strong>可将同一行为的不同版本移到同一个类中。</span></li>
+        <li class="pros"><span class="en">A visitor can accumulate useful info while working with various objects (e.g., traversing a tree).</span><span class="cn">访问者对象可在与各种对象交互时收集有用信息（例如遍历对象树）。</span></li>
+        <li class="cons"><span class="en">You need to update all visitors each time a class is added to or removed from the element hierarchy.</span><span class="cn">每次在元素层次结构中添加或移除一个类时，都要更新所有的访问者。</span></li>
+        <li class="cons"><span class="en">Visitors might lack access to private fields and methods of the elements they work with.</span><span class="cn">访问者可能没有访问元素私有成员变量和方法的必要权限。</span></li>
+      </ul>
+    </div>
+  </details>
 </div>
 
 <div class="callout">
