@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dive Into Design Patterns | 深入设计模式</title>
+  <meta name="description" content="An interactive guide to 22 classic GoF design patterns with bilingual support (English/Chinese).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ===== CSS Custom Properties ===== */
+    :root {
+      --red: #e74c3c;
+      --red-dark: #c0392b;
+      --red-light: #fadbd8;
+      --dark: #1a1a2e;
+      --dark-2: #16213e;
+      --dark-3: #0f3460;
+      --white: #ffffff;
+      --gray-50: #f8f9fa;
+      --gray-100: #f1f3f5;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-400: #ced4da;
+      --gray-500: #adb5bd;
+      --gray-600: #868e96;
+      --gray-700: #495057;
+      --gray-800: #343a40;
+      --gray-900: #212529;
+      --green: #27ae60;
+      --green-light: #d5f5e3;
+      --green-bg: #f0faf4;
+      --blue: #2980b9;
+      --blue-light: #d4e6f1;
+      --blue-bg: #eaf2f8;
+      --orange: #e67e22;
+      --orange-light: #fdebd0;
+      --orange-bg: #fef9f0;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font: 'PT Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --max-w: 1200px;
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      font-family: var(--font);
+      color: var(--gray-800);
+      background: var(--white);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== Language Toggle ===== */
+    [data-lang="en"] .cn { display: none; }
+    [data-lang="cn"] .en { display: none; }
+
+    /* ===== Navigation ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+      transition: var(--transition);
+    }
+    .navbar.scrolled {
+      box-shadow: var(--shadow);
+    }
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--dark);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo .diamond {
+      width: 28px;
+      height: 28px;
+      background: var(--red);
+      transform: rotate(45deg);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--gray-700);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 700;
+      transition: var(--transition);
+    }
+    .nav-links a:hover {
+      color: var(--red);
+      background: var(--red-light);
+    }
+    .lang-toggle {
+      display: flex;
+      background: var(--gray-100);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .lang-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      color: var(--gray-600);
+      transition: var(--transition);
+    }
+    .lang-btn.active {
+      background: var(--white);
+      color: var(--red);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .mobile-menu-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--gray-800);
+      margin: 5px 0;
+      transition: var(--transition);
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 50%, var(--dark-3) 100%);
+      overflow: hidden;
+      padding: 120px 24px 80px;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: var(--red);
+      opacity: 0.06;
+      transform: rotate(45deg);
+      top: -100px;
+      right: -100px;
+      border-radius: 40px;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: var(--red);
+      opacity: 0.04;
+      transform: rotate(45deg);
+      bottom: -50px;
+      left: -50px;
+      border-radius: 20px;
+    }
+    .hero-content {
+      max-width: 800px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(231, 76, 60, 0.15);
+      color: var(--red);
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 32px;
+      border: 1px solid rgba(231, 76, 60, 0.25);
+    }
+    .hero-badge .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+    .hero h1 .accent {
+      color: var(--red);
+    }
+    .hero-subtitle {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--gray-400);
+      max-width: 600px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat-num {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--red);
+      display: block;
+    }
+    .hero-stat-label {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+    .hero-scroll {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+    .hero-scroll svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--gray-500);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ===== Sections ===== */
+    .section {
+      padding: 96px 24px;
+    }
+    .section-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .section-label {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--red);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      color: var(--gray-900);
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .section-desc {
+      font-size: 17px;
+      color: var(--gray-600);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .bg-alt {
+      background: var(--gray-50);
+    }
+
+    /* ===== OOP Pillars ===== */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .pillar-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      border: 1px solid var(--gray-200);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .pillar-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--red);
+      transform: scaleX(0);
+      transition: var(--transition);
+    }
+    .pillar-card:hover {
+      border-color: var(--red-light);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .pillar-card:hover::before {
+      transform: scaleX(1);
+    }
+    .pillar-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+      background: var(--red-light);
+      color: var(--red);
+    }
+    .pillar-card h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: var(--gray-900);
+    }
+    .pillar-card p {
+      font-size: 15px;
+      color: var(--gray-600);
+      line-height: 1.7;
+    }
+
+    /* ===== SOLID Section ===== */
+    .solid-grid {
+      display: grid;
+      gap: 20px;
+    }
+    .solid-card {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 24px;
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px;
+      border: 1px solid var(--gray-200);
+      transition: var(--transition);
+      align-items: start;
+    }
+    .solid-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+      border-color: var(--red-light);
+    }
+    .solid-letter {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--red), var(--red-dark));
+      color: var(--white);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .solid-card h3 {
+      font-size: 18px;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+    .solid-card p {
+      font-size: 15px;
+      color: var(--gray-600);
+      line-height: 1.7;
+    }
+
+    /* ===== Pattern Catalog ===== */
+    .catalog-nav {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    .catalog-tab {
+      padding: 10px 24px;
+      border: 2px solid var(--gray-200);
+      border-radius: 30px;
+      background: var(--white);
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .catalog-tab:hover {
+      border-color: var(--gray-400);
+    }
+    .catalog-tab.active,
+    .catalog-tab[data-cat="creational"].active {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--white);
+    }
+    .catalog-tab[data-cat="structural"].active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: var(--white);
+    }
+    .catalog-tab[data-cat="behavioral"].active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: var(--white);
+    }
+
+    .category-section {
+      margin-bottom: 64px;
+      display: none;
+    }
+    .category-section.visible {
+      display: block;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+    .category-badge {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .cat-creational .category-badge {
+      background: var(--green-light);
+      color: var(--green);
+    }
+    .cat-structural .category-badge {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+    .cat-behavioral .category-badge {
+      background: var(--orange-light);
+      color: var(--orange);
+    }
+    .category-header h3 {
+      font-size: 24px;
+      color: var(--gray-900);
+    }
+
+    .patterns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    .pattern-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+      transition: var(--transition);
+      cursor: default;
+      position: relative;
+    }
+    .pattern-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+    .pattern-card-top {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cat-creational .pattern-card-top { background: var(--green-bg); }
+    .cat-structural .pattern-card-top { background: var(--blue-bg); }
+    .cat-behavioral .pattern-card-top { background: var(--orange-bg); }
+
+    .pattern-icon {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+    .pattern-icon svg {
+      width: 64px;
+      height: 64px;
+    }
+    .cat-creational .pattern-icon svg { color: var(--green); }
+    .cat-structural .pattern-icon svg { color: var(--blue); }
+    .cat-behavioral .pattern-icon svg { color: var(--orange); }
+
+    .pattern-card-top .deco {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      opacity: 0.08;
+    }
+    .cat-creational .deco { background: var(--green); }
+    .cat-structural .deco { background: var(--blue); }
+    .cat-behavioral .deco { background: var(--orange); }
+    .deco-1 { top: -30px; right: -30px; }
+    .deco-2 { bottom: -40px; left: -20px; width: 80px !important; height: 80px !important; }
+
+    .pattern-card-body {
+      padding: 24px;
+    }
+    .pattern-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+    .pattern-name-sub {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+    .pattern-desc {
+      font-size: 15px;
+      color: var(--gray-600);
+      line-height: 1.7;
+    }
+    .pattern-tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .cat-creational .pattern-tag { background: var(--green-light); color: var(--green); }
+    .cat-structural .pattern-tag { background: var(--blue-light); color: var(--blue); }
+    .cat-behavioral .pattern-tag { background: var(--orange-light); color: var(--orange); }
+
+    /* ===== Pattern Detail (expandable) ===== */
+    .pattern-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      border-top: 0 solid var(--gray-200);
+    }
+    .pattern-card.expanded .pattern-detail {
+      max-height: 600px;
+      border-top-width: 1px;
+    }
+    .pattern-detail-inner {
+      padding: 24px;
+    }
+    .pattern-detail h4 {
+      font-size: 15px;
+      color: var(--gray-800);
+      margin-bottom: 8px;
+    }
+    .pattern-detail p {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .pattern-detail pre {
+      background: var(--gray-900);
+      color: #e0e0e0;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+    .pattern-detail pre .kw { color: #c792ea; }
+    .pattern-detail pre .fn { color: #82aaff; }
+    .pattern-detail pre .cm { color: #546e7a; }
+    .pattern-detail pre .st { color: #c3e88d; }
+
+    .expand-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .expand-btn:hover {
+      color: var(--red);
+      background: var(--red-light);
+    }
+    .expand-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: var(--transition);
+    }
+    .pattern-card.expanded .expand-btn svg {
+      transform: rotate(180deg);
+    }
+
+    /* ===== Relationships Section ===== */
+    .rel-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 40px 0;
+    }
+    .rel-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .rel-box {
+      width: 100px;
+      height: 60px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--white);
+      transition: var(--transition);
+    }
+    .rel-box:hover { transform: scale(1.05); }
+    .rel-label {
+      font-size: 12px;
+      color: var(--gray-500);
+      text-align: center;
+    }
+    .rel-arrow {
+      font-size: 20px;
+      color: var(--gray-400);
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      background: var(--dark);
+      color: var(--gray-400);
+      padding: 64px 24px 32px;
+    }
+    .footer-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 48px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .footer-brand {
+      max-width: 320px;
+    }
+    .footer-brand h3 {
+      color: var(--white);
+      font-size: 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-brand .diamond {
+      width: 20px;
+      height: 20px;
+      background: var(--red);
+      transform: rotate(45deg);
+      border-radius: 3px;
+    }
+    .footer-brand p {
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .footer-links h4 {
+      color: var(--white);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    .footer-links ul {
+      list-style: none;
+    }
+    .footer-links li {
+      margin-bottom: 8px;
+    }
+    .footer-links a {
+      color: var(--gray-500);
+      text-decoration: none;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    .footer-links a:hover {
+      color: var(--red);
+    }
+    .footer-bottom {
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-600);
+    }
+    .footer-bottom a {
+      color: var(--red);
+      text-decoration: none;
+    }
+
+    /* ===== Back to Top ===== */
+    .back-to-top {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 48px;
+      height: 48px;
+      background: var(--red);
+      color: var(--white);
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: var(--transition);
+      z-index: 999;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .back-to-top:hover {
+      background: var(--red-dark);
+      transform: translateY(-2px);
+    }
+
+    /* ===== Mobile Sidebar ===== */
+    .mobile-nav {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 280px;
+      height: 100vh;
+      background: var(--white);
+      z-index: 2000;
+      padding: 80px 24px 24px;
+      transition: var(--transition);
+      box-shadow: var(--shadow-lg);
+    }
+    .mobile-nav.open { right: 0; }
+    .mobile-nav a {
+      display: block;
+      padding: 12px 0;
+      color: var(--gray-700);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      border-bottom: 1px solid var(--gray-100);
+      transition: var(--transition);
+    }
+    .mobile-nav a:hover { color: var(--red); }
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1999;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+    .mobile-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .mobile-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: var(--gray-600);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      .hero { min-height: auto; padding: 120px 20px 60px; }
+      .hero-stats { gap: 24px; }
+      .patterns-grid { grid-template-columns: 1fr; }
+      .solid-card { grid-template-columns: 56px 1fr; gap: 16px; padding: 24px; }
+      .solid-letter { width: 48px; height: 48px; font-size: 24px; }
+      .section { padding: 64px 20px; }
+      .footer-top { flex-direction: column; gap: 32px; }
+      .catalog-tab { padding: 8px 16px; font-size: 13px; }
+      .rel-diagram { flex-direction: column; }
+      .rel-arrow { transform: rotate(90deg); }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 28px; }
+      .section-title { font-size: 24px; }
+      .pillars-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== TOC Sidebar ===== */
+    .toc-sidebar {
+      position: fixed;
+      top: 50%;
+      left: 16px;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .toc-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-300);
+      background: var(--white);
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .toc-dot:hover,
+    .toc-dot.active {
+      border-color: var(--red);
+      background: var(--red);
+    }
+    .toc-dot .toc-tooltip {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--gray-900);
+      color: var(--white);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+    .toc-dot:hover .toc-tooltip { opacity: 1; }
+
+    @media (max-width: 1024px) {
+      .toc-sidebar { display: none; }
+    }
+
+    /* ===== Animations ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="diamond"></div>
+      <span class="en">Design Patterns</span>
+      <span class="cn">设计模式</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#oop"><span class="en">OOP Basics</span><span class="cn">OOP 基础</span></a></li>
+      <li><a href="#solid"><span class="en">SOLID</span><span class="cn">SOLID 原则</span></a></li>
+      <li><a href="#catalog"><span class="en">Patterns</span><span class="cn">模式目录</span></a></li>
+      <li>
+        <div class="lang-toggle">
+          <button class="lang-btn active" data-l="en" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" data-l="cn" onclick="setLang('cn')">中文</button>
+        </div>
+      </li>
+    </ul>
+    <button class="mobile-menu-btn" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileNav()"></div>
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-close" onclick="toggleMobileNav()">&times;</button>
+  <a href="#oop" onclick="toggleMobileNav()"><span class="en">OOP Basics</span><span class="cn">OOP 基础</span></a>
+  <a href="#solid" onclick="toggleMobileNav()"><span class="en">SOLID Principles</span><span class="cn">SOLID 原则</span></a>
+  <a href="#catalog" onclick="toggleMobileNav()"><span class="en">Pattern Catalog</span><span class="cn">模式目录</span></a>
+  <div style="padding-top:16px;">
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-l="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-l="cn" onclick="setLang('cn')">中文</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOC Sidebar -->
+<div class="toc-sidebar" id="tocSidebar">
+  <div class="toc-dot" data-section="hero"><span class="toc-tooltip en">Top</span><span class="toc-tooltip cn">顶部</span></div>
+  <div class="toc-dot" data-section="oop"><span class="toc-tooltip en">OOP</span><span class="toc-tooltip cn">OOP 基础</span></div>
+  <div class="toc-dot" data-section="solid"><span class="toc-tooltip en">SOLID</span><span class="toc-tooltip cn">SOLID</span></div>
+  <div class="toc-dot" data-section="catalog"><span class="toc-tooltip en">Patterns</span><span class="toc-tooltip cn">模式目录</span></div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      <span class="en">Interactive Learning Guide</span>
+      <span class="cn">交互式学习指南</span>
+    </div>
+    <h1>
+      <span class="en">Dive Into<br><span class="accent">Design Patterns</span></span>
+      <span class="cn">深入<br><span class="accent">设计模式</span></span>
+    </h1>
+    <p class="hero-subtitle">
+      <span class="en">Master the 22 classic GoF design patterns. Learn how to write flexible, reusable, and maintainable code through proven solutions to common software design problems.</span>
+      <span class="cn">掌握 22 个经典 GoF 设计模式。通过成熟的解决方案来应对常见的软件设计问题，学会编写灵活、可复用、可维护的代码。</span>
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">22</span>
+        <span class="hero-stat-label"><span class="en">Patterns</span><span class="cn">设计模式</span></span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">3</span>
+        <span class="hero-stat-label"><span class="en">Categories</span><span class="cn">大类</span></span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">5</span>
+        <span class="hero-stat-label"><span class="en">SOLID Principles</span><span class="cn">SOLID 原则</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- OOP Basics -->
+<section class="section bg-alt" id="oop">
+  <div class="section-inner">
+    <div class="section-header fade-in">
+      <span class="section-label"><span class="en">Foundations</span><span class="cn">基础知识</span></span>
+      <h2 class="section-title">
+        <span class="en">OOP Pillars</span>
+        <span class="cn">面向对象程序设计基础</span>
+      </h2>
+      <p class="section-desc">
+        <span class="en">The four fundamental concepts that distinguish object-oriented programming from other paradigms.</span>
+        <span class="cn">区分面向对象程序设计与其他编程范式的四个基本概念。</span>
+      </p>
+    </div>
+    <div class="pillars-grid">
+      <div class="pillar-card fade-in">
+        <div class="pillar-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z" opacity="0.5"/></svg>
+        </div>
+        <h3><span class="en">Abstraction</span><span class="cn">抽象</span></h3>
+        <p>
+          <span class="en">A model that reflects specific aspects of real-world objects or phenomena, capturing relevant details while ignoring everything else. Like how a flight simulator and a booking app model an Airplane differently.</span>
+          <span class="cn">反映真实世界对象或现象中特定内容的模型，能高精度地反映相关详细信息，同时忽略其他内容。就像飞行模拟器和订票应用会以不同方式建模飞机。</span>
+        </p>
+      </div>
+      <div class="pillar-card fade-in">
+        <div class="pillar-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18"/><path d="M12 3v9"/></svg>
+        </div>
+        <h3><span class="en">Encapsulation</span><span class="cn">封装</span></h3>
+        <p>
+          <span class="en">The ability of an object to hide parts of its state and behavior from other objects, exposing only a limited interface. Like starting a car with a key &mdash; the engine internals are hidden behind a simple interface.</span>
+          <span class="cn">对象对其他对象隐藏其部分状态和行为、仅向程序其他部分暴露有限接口的能力。就像用钥匙启动汽车——发动机内部被隐藏在简单的接口之后。</span>
+        </p>
+      </div>
+      <div class="pillar-card fade-in">
+        <div class="pillar-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v6"/><path d="M6 15v6"/><path d="M18 15v6"/><circle cx="12" cy="12" r="3"/><circle cx="6" cy="12" r="2" opacity="0.5"/><circle cx="18" cy="12" r="2" opacity="0.5"/></svg>
+        </div>
+        <h3><span class="en">Inheritance</span><span class="cn">继承</span></h3>
+        <p>
+          <span class="en">The ability to build new classes on top of existing ones. The main benefit is code reuse &mdash; subclasses inherit the parent's interface and implementation, and can extend them with new functionality.</span>
+          <span class="cn">在已有类的基础上创建新类的能力。最主要的好处是代码复用——子类继承父类的接口和实现，并可以通过新功能对其进行扩展。</span>
+        </p>
+      </div>
+      <div class="pillar-card fade-in">
+        <div class="pillar-icon">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 5v8l-8 5-8-5V8z"/><path d="M12 8l4 2.5v5L12 18l-4-2.5v-5z" opacity="0.5"/></svg>
+        </div>
+        <h3><span class="en">Polymorphism</span><span class="cn">多态</span></h3>
+        <p>
+          <span class="en">The ability of a program to detect the actual class of an object and call its implementation, even when the real type is unknown in the current context. An object can "pretend" to be something else.</span>
+          <span class="cn">程序能检测对象所属的实际类，并在当前上下文不知道其真实类型的情况下调用其实现的能力。对象可以"假扮"为其他东西。</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLID Principles -->
+<section class="section" id="solid">
+  <div class="section-inner">
+    <div class="section-header fade-in">
+      <span class="section-label"><span class="en">Design Principles</span><span class="cn">设计原则</span></span>
+      <h2 class="section-title">
+        <span class="en">SOLID Principles</span>
+        <span class="cn">SOLID 原则</span>
+      </h2>
+      <p class="section-desc">
+        <span class="en">Five core principles of object-oriented design that make software more understandable, flexible, and maintainable.</span>
+        <span class="cn">面向对象设计的五条核心原则，使软件更易理解、更灵活、更易维护。</span>
+      </p>
+    </div>
+    <div class="solid-grid">
+      <div class="solid-card fade-in">
+        <div class="solid-letter">S</div>
+        <div>
+          <h3><span class="en">Single Responsibility</span><span class="cn">单一职责原则</span></h3>
+          <p>
+            <span class="en">A class should have just one reason to change. Each class handles one specific part of the functionality. This reduces complexity and makes the class easier to understand and maintain.</span>
+            <span class="cn">一个类应该只有一个引起变化的原因。每个类只负责功能的一个特定部分，这降低了复杂性，使类更容易理解和维护。</span>
+          </p>
+        </div>
+      </div>
+      <div class="solid-card fade-in">
+        <div class="solid-letter">O</div>
+        <div>
+          <h3><span class="en">Open/Closed</span><span class="cn">开闭原则</span></h3>
+          <p>
+            <span class="en">Classes should be open for extension but closed for modification. You should be able to add new behavior without changing existing code, typically through interfaces and abstract classes.</span>
+            <span class="cn">类应该对扩展开放，对修改关闭。你应该能够在不修改已有代码的情况下添加新行为，通常通过接口和抽象类来实现。</span>
+          </p>
+        </div>
+      </div>
+      <div class="solid-card fade-in">
+        <div class="solid-letter">L</div>
+        <div>
+          <h3><span class="en">Liskov Substitution</span><span class="cn">里氏替换原则</span></h3>
+          <p>
+            <span class="en">Subclasses should be substitutable for their base classes without breaking the program. When overriding a method, extend the base behavior rather than replacing it entirely.</span>
+            <span class="cn">子类应该能够替换其基类而不会破坏程序。在重写方法时，应该扩展基类行为，而非完全替换它。</span>
+          </p>
+        </div>
+      </div>
+      <div class="solid-card fade-in">
+        <div class="solid-letter">I</div>
+        <div>
+          <h3><span class="en">Interface Segregation</span><span class="cn">接口隔离原则</span></h3>
+          <p>
+            <span class="en">Clients should not be forced to depend on interfaces they don't use. Break large interfaces into smaller, more specific ones so that clients only need to know about relevant methods.</span>
+            <span class="cn">客户端不应该被迫依赖它们不使用的接口。将大接口拆分为更小、更具体的接口，使客户端只需了解相关的方法。</span>
+          </p>
+        </div>
+      </div>
+      <div class="solid-card fade-in">
+        <div class="solid-letter">D</div>
+        <div>
+          <h3><span class="en">Dependency Inversion</span><span class="cn">依赖倒置原则</span></h3>
+          <p>
+            <span class="en">High-level classes should not depend on low-level classes. Both should depend on abstractions. Abstractions should not depend on details &mdash; details should depend on abstractions.</span>
+            <span class="cn">高层类不应该依赖低层类，两者都应该依赖于抽象。抽象不应该依赖于细节——细节应该依赖于抽象。</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pattern Catalog -->
+<section class="section bg-alt" id="catalog">
+  <div class="section-inner">
+    <div class="section-header fade-in">
+      <span class="section-label"><span class="en">22 Classic Patterns</span><span class="cn">22 个经典模式</span></span>
+      <h2 class="section-title">
+        <span class="en">Pattern Catalog</span>
+        <span class="cn">设计模式目录</span>
+      </h2>
+      <p class="section-desc">
+        <span class="en">Explore all 22 GoF design patterns organized by intent: creational, structural, and behavioral.</span>
+        <span class="cn">探索按意图分类的全部 22 个 GoF 设计模式：创建型、结构型和行为型。</span>
+      </p>
+    </div>
+
+    <div class="catalog-nav">
+      <button class="catalog-tab active" data-cat="all" onclick="filterPatterns('all')">
+        <span class="en">All Patterns</span><span class="cn">全部模式</span>
+      </button>
+      <button class="catalog-tab" data-cat="creational" onclick="filterPatterns('creational')">
+        <span class="en">Creational</span><span class="cn">创建型</span>
+      </button>
+      <button class="catalog-tab" data-cat="structural" onclick="filterPatterns('structural')">
+        <span class="en">Structural</span><span class="cn">结构型</span>
+      </button>
+      <button class="catalog-tab" data-cat="behavioral" onclick="filterPatterns('behavioral')">
+        <span class="en">Behavioral</span><span class="cn">行为型</span>
+      </button>
+    </div>
+
+    <!-- Creational Patterns -->
+    <div class="category-section cat-creational visible" data-category="creational" id="creational">
+      <div class="category-header">
+        <span class="category-badge"><span class="en">Creational</span><span class="cn">创建型</span></span>
+        <h3><span class="en">Object Creation Mechanisms</span><span class="cn">对象创建机制</span></h3>
+      </div>
+      <div class="patterns-grid">
+
+        <!-- Factory Method -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div>
+            <div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="28" width="20" height="28" rx="2"/>
+                <rect x="36" y="20" width="20" height="36" rx="2"/>
+                <path d="M18 8v20" stroke-dasharray="4 3"/>
+                <path d="M46 8v12" stroke-dasharray="4 3"/>
+                <circle cx="18" cy="6" r="4" fill="currentColor" opacity="0.3"/>
+                <circle cx="46" cy="6" r="4" fill="currentColor" opacity="0.3"/>
+                <path d="M14 40h8M14 46h8M42 32h8M42 38h8M42 46h8"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Factory Method</div>
+            <div class="pattern-name-sub"><span class="en">aka Virtual Constructor</span><span class="cn">工厂方法 / 虚拟构造函数</span></div>
+            <p class="pattern-desc">
+              <span class="en">Defines an interface for creating objects, but lets subclasses decide which class to instantiate. Delegates the instantiation logic to child classes.</span>
+              <span class="cn">定义一个创建对象的接口，但让子类决定实例化哪个类。将实例化逻辑委派给子类。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Creational</span><span class="cn">创建型</span></span>
+          </div>
+          <div class="pattern-detail">
+            <div class="pattern-detail-inner">
+              <h4><span class="en">When to use</span><span class="cn">适用场景</span></h4>
+              <p><span class="en">Use when you don't know beforehand the exact types and dependencies of the objects your code should work with. Also useful when you want to provide users of your library or framework with a way to extend its internal components.</span><span class="cn">当你事先不知道代码应该使用的对象的确切类型和依赖关系时使用。当你想为库或框架的用户提供扩展其内部组件的方式时也很有用。</span></p>
+              <h4><span class="en">Structure</span><span class="cn">结构</span></h4>
+              <pre><span class="kw">interface</span> Product { ... }
+
+<span class="kw">abstract class</span> Creator {
+  <span class="kw">abstract</span> <span class="fn">createProduct</span>(): Product
+
+  <span class="fn">operation</span>() {
+    <span class="kw">const</span> product = <span class="kw">this</span>.<span class="fn">createProduct</span>()
+    <span class="cm">// use product...</span>
+  }
+}
+
+<span class="kw">class</span> ConcreteCreator <span class="kw">extends</span> Creator {
+  <span class="fn">createProduct</span>(): Product {
+    <span class="kw">return new</span> <span class="fn">ConcreteProduct</span>()
+  }
+}</pre>
+            </div>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)">
+            <span class="en">View Details</span><span class="cn">查看详情</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <!-- Abstract Factory -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div>
+            <div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="30" width="16" height="24" rx="2"/>
+                <rect x="24" y="30" width="16" height="24" rx="2"/>
+                <rect x="44" y="30" width="16" height="24" rx="2"/>
+                <path d="M32 8v22"/>
+                <path d="M12 30V18L32 8"/>
+                <path d="M52 30V18L32 8"/>
+                <circle cx="32" cy="8" r="4" fill="currentColor" opacity="0.3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Abstract Factory</div>
+            <div class="pattern-name-sub"><span class="en">Family of related objects</span><span class="cn">抽象工厂 / 相关对象族</span></div>
+            <p class="pattern-desc">
+              <span class="en">Creates families of related objects without specifying their concrete classes. Ensures that the created products are compatible with each other.</span>
+              <span class="cn">创建一系列相关的对象，而无需指定其具体类。确保创建的产品相互兼容。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Creational</span><span class="cn">创建型</span></span>
+          </div>
+          <div class="pattern-detail">
+            <div class="pattern-detail-inner">
+              <h4><span class="en">When to use</span><span class="cn">适用场景</span></h4>
+              <p><span class="en">Use when your code needs to work with various families of related products, but you don't want it to depend on concrete classes — they might be unknown beforehand or you want to allow for future extensibility.</span><span class="cn">当你的代码需要与多组相关产品交互，但又不希望依赖具体类时使用——它们可能事先未知，或者你希望为未来的可扩展性留出空间。</span></p>
+            </div>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)">
+            <span class="en">View Details</span><span class="cn">查看详情</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <!-- Builder -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div>
+            <div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="14" y="44" width="36" height="12" rx="2"/>
+                <rect x="18" y="32" width="28" height="12" rx="2"/>
+                <rect x="22" y="20" width="20" height="12" rx="2"/>
+                <rect x="26" y="8" width="12" height="12" rx="2"/>
+                <path d="M8 56h48" opacity="0.3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Builder</div>
+            <div class="pattern-name-sub"><span class="en">Step-by-step construction</span><span class="cn">生成器 / 分步构造</span></div>
+            <p class="pattern-desc">
+              <span class="en">Constructs complex objects step by step. Allows you to produce different types and representations of an object using the same construction process.</span>
+              <span class="cn">分步骤构造复杂对象。允许你使用相同的构造过程生成不同类型和形式的对象。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Creational</span><span class="cn">创建型</span></span>
+          </div>
+          <div class="pattern-detail">
+            <div class="pattern-detail-inner">
+              <h4><span class="en">When to use</span><span class="cn">适用场景</span></h4>
+              <p><span class="en">Use when constructing objects that require many steps. Especially useful when you want to avoid a "telescoping constructor" with too many parameters.</span><span class="cn">当需要通过许多步骤来构建对象时使用。当你想避免拥有太多参数的"伸缩构造函数"时尤其有用。</span></p>
+            </div>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)">
+            <span class="en">View Details</span><span class="cn">查看详情</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <!-- Prototype -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div>
+            <div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="16" width="24" height="32" rx="3"/>
+                <rect x="32" y="16" width="24" height="32" rx="3" stroke-dasharray="4 3" opacity="0.6"/>
+                <path d="M20 28h-4v8h4M20 28v4h-4"/>
+                <path d="M44 28h-4v8h4M44 28v4h-4" opacity="0.6"/>
+                <path d="M28 32h8" stroke-dasharray="3 2"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Prototype</div>
+            <div class="pattern-name-sub"><span class="en">Clone existing objects</span><span class="cn">原型 / 克隆现有对象</span></div>
+            <p class="pattern-desc">
+              <span class="en">Creates new objects by copying an existing object (prototype), delegating the cloning process to the actual objects that are being cloned.</span>
+              <span class="cn">通过复制现有对象（原型）来创建新对象，将克隆过程委托给被克隆的实际对象。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Creational</span><span class="cn">创建型</span></span>
+          </div>
+          <div class="pattern-detail">
+            <div class="pattern-detail-inner">
+              <h4><span class="en">When to use</span><span class="cn">适用场景</span></h4>
+              <p><span class="en">Use when your code shouldn't depend on the concrete classes of objects you need to copy, or when you want to reduce the number of subclasses that only differ in initialization.</span><span class="cn">当代码不应依赖于需要复制的对象的具体类时使用，或当你想减少仅在初始化方式上有所不同的子类数量时使用。</span></p>
+            </div>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)">
+            <span class="en">View Details</span><span class="cn">查看详情</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <!-- Singleton -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div>
+            <div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="32" cy="32" r="16"/>
+                <circle cx="32" cy="32" r="6" fill="currentColor" opacity="0.3"/>
+                <path d="M32 4v12M32 48v12M4 32h12M48 32h12" opacity="0.4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Singleton</div>
+            <div class="pattern-name-sub"><span class="en">Single instance only</span><span class="cn">单例 / 唯一实例</span></div>
+            <p class="pattern-desc">
+              <span class="en">Ensures a class has only one instance while providing a global access point to it. Controls shared resources like a database connection or file system.</span>
+              <span class="cn">确保一个类只有一个实例，同时提供全局访问点。控制共享资源，如数据库连接或文件系统。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Creational</span><span class="cn">创建型</span></span>
+          </div>
+          <div class="pattern-detail">
+            <div class="pattern-detail-inner">
+              <h4><span class="en">When to use</span><span class="cn">适用场景</span></h4>
+              <p><span class="en">Use when a class should have only a single instance available to all clients, such as a shared database object. Also useful when you need stricter control over global variables.</span><span class="cn">当一个类应该只有一个可供所有客户端使用的实例时使用，例如共享的数据库对象。当需要更严格地控制全局变量时也很有用。</span></p>
+            </div>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)">
+            <span class="en">View Details</span><span class="cn">查看详情</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Structural Patterns -->
+    <div class="category-section cat-structural visible" data-category="structural" id="structural">
+      <div class="category-header">
+        <span class="category-badge"><span class="en">Structural</span><span class="cn">结构型</span></span>
+        <h3><span class="en">Object Composition</span><span class="cn">对象组合</span></h3>
+      </div>
+      <div class="patterns-grid">
+
+        <!-- Adapter -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="22" width="20" height="20" rx="3"/>
+                <circle cx="52" cy="32" r="10"/>
+                <path d="M24 32h8"/>
+                <path d="M36 26v12l6-4v-4z" fill="currentColor" opacity="0.2"/>
+                <path d="M36 26v12l6-4v-4z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Adapter</div>
+            <div class="pattern-name-sub"><span class="en">aka Wrapper</span><span class="cn">适配器 / 包装器</span></div>
+            <p class="pattern-desc">
+              <span class="en">Allows objects with incompatible interfaces to collaborate by wrapping one object to make it compatible with another.</span>
+              <span class="cn">通过包装对象使不兼容的接口能够相互协作。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Structural</span><span class="cn">结构型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Bridge -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="8" width="20" height="16" rx="2"/>
+                <rect x="40" y="8" width="20" height="16" rx="2"/>
+                <rect x="4" y="40" width="20" height="16" rx="2"/>
+                <rect x="40" y="40" width="20" height="16" rx="2"/>
+                <path d="M24 16h16" stroke-width="3"/>
+                <path d="M14 24v16M50 24v16" stroke-dasharray="3 2" opacity="0.5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Bridge</div>
+            <div class="pattern-name-sub"><span class="en">Separate abstraction from implementation</span><span class="cn">桥接 / 分离抽象与实现</span></div>
+            <p class="pattern-desc">
+              <span class="en">Splits a large class or a set of closely related classes into two separate hierarchies — abstraction and implementation — which can be developed independently.</span>
+              <span class="cn">将一个大类或一组紧密相关的类拆分为抽象和实现两个独立的层次结构，使它们可以独立开发。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Structural</span><span class="cn">结构型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Composite -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="32" cy="12" r="6" fill="currentColor" opacity="0.2"/>
+                <circle cx="16" cy="32" r="5"/>
+                <circle cx="48" cy="32" r="5"/>
+                <circle cx="8" cy="52" r="4" fill="currentColor" opacity="0.2"/>
+                <circle cx="24" cy="52" r="4" fill="currentColor" opacity="0.2"/>
+                <circle cx="42" cy="52" r="4" fill="currentColor" opacity="0.2"/>
+                <circle cx="56" cy="52" r="4" fill="currentColor" opacity="0.2"/>
+                <path d="M32 18v8l-14 6M32 18v8l14 6"/>
+                <path d="M16 37v8l-6 3M16 37v8l6 3M48 37v8l-6 3M48 37v8l6 3" opacity="0.6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Composite</div>
+            <div class="pattern-name-sub"><span class="en">Tree structure of objects</span><span class="cn">组合 / 对象树</span></div>
+            <p class="pattern-desc">
+              <span class="en">Composes objects into tree structures to represent part-whole hierarchies. Lets clients treat individual objects and compositions uniformly.</span>
+              <span class="cn">将对象组合成树形结构来表示"部分-整体"层次关系。让客户端统一处理单个对象和组合对象。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Structural</span><span class="cn">结构型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Decorator -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="20" y="20" width="24" height="24" rx="3"/>
+                <rect x="14" y="14" width="36" height="36" rx="5" stroke-dasharray="4 3" opacity="0.5"/>
+                <rect x="8" y="8" width="48" height="48" rx="7" stroke-dasharray="6 4" opacity="0.3"/>
+                <circle cx="32" cy="32" r="4" fill="currentColor" opacity="0.3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Decorator</div>
+            <div class="pattern-name-sub"><span class="en">aka Wrapper</span><span class="cn">装饰 / 包装器</span></div>
+            <p class="pattern-desc">
+              <span class="en">Attaches new behaviors to objects by placing them inside wrapper objects that contain the behaviors. A flexible alternative to subclassing.</span>
+              <span class="cn">通过将对象放入包含行为的包装器对象中来为其附加新行为。是子类化的灵活替代方案。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Structural</span><span class="cn">结构型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Facade -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 56V20l20-12 20 12v36"/>
+                <rect x="20" y="24" width="8" height="8" rx="1" fill="currentColor" opacity="0.15"/>
+                <rect x="36" y="24" width="8" height="8" rx="1" fill="currentColor" opacity="0.15"/>
+                <rect x="20" y="38" width="8" height="8" rx="1" fill="currentColor" opacity="0.15"/>
+                <rect x="36" y="38" width="8" height="8" rx="1" fill="currentColor" opacity="0.15"/>
+                <rect x="26" y="48" width="12" height="8" rx="1"/>
+                <path d="M8 56h48"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Facade</div>
+            <div class="pattern-name-sub"><span class="en">Simplified interface</span><span class="cn">外观 / 简化接口</span></div>
+            <p class="pattern-desc">
+              <span class="en">Provides a simplified interface to a library, framework, or any other complex set of classes, hiding the complexity behind a single class.</span>
+              <span class="cn">为库、框架或其他复杂的类集合提供简化的接口，将复杂性隐藏在单个类之后。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Structural</span><span class="cn">结构型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Flyweight -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="20" cy="20" r="8"/>
+                <circle cx="44" cy="20" r="8"/>
+                <circle cx="20" cy="44" r="8"/>
+                <circle cx="44" cy="44" r="8"/>
+                <circle cx="32" cy="32" r="6" fill="currentColor" opacity="0.3"/>
+                <path d="M26 26l4 4M38 26l-4 4M26 38l4-4M38 38l-4-4" opacity="0.5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Flyweight</div>
+            <div class="pattern-name-sub"><span class="en">Shared state</span><span class="cn">享元 / 共享状态</span></div>
+            <p class="pattern-desc">
+              <span class="en">Fits more objects into available RAM by sharing common parts of state between multiple objects instead of keeping all data in each object.</span>
+              <span class="cn">通过在多个对象间共享状态的公共部分，而非在每个对象中保存所有数据，使更多对象能装入可用内存。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Structural</span><span class="cn">结构型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Proxy -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="36" y="16" width="22" height="32" rx="3"/>
+                <rect x="6" y="20" width="18" height="24" rx="3" opacity="0.5"/>
+                <path d="M24 32h12"/>
+                <path d="M42 26h10M42 32h10M42 38h10" opacity="0.4"/>
+                <circle cx="33" cy="32" r="3" fill="currentColor" opacity="0.3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Proxy</div>
+            <div class="pattern-name-sub"><span class="en">Access control</span><span class="cn">代理 / 访问控制</span></div>
+            <p class="pattern-desc">
+              <span class="en">Provides a substitute or placeholder for another object. A proxy controls access to the original object, performing something before or after the request reaches it.</span>
+              <span class="cn">为另一个对象提供替代品或占位符。代理控制对原始对象的访问，在请求到达前后执行某些操作。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Structural</span><span class="cn">结构型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Behavioral Patterns -->
+    <div class="category-section cat-behavioral visible" data-category="behavioral" id="behavioral">
+      <div class="category-header">
+        <span class="category-badge"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+        <h3><span class="en">Communication & Responsibility</span><span class="cn">沟通与职责</span></h3>
+      </div>
+      <div class="patterns-grid">
+
+        <!-- Chain of Responsibility -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="32" r="7"/>
+                <circle cx="32" cy="32" r="7"/>
+                <circle cx="52" cy="32" r="7"/>
+                <path d="M19 32h6M39 32h6"/>
+                <path d="M12 25v-8M32 25v-8M52 25v-8" stroke-dasharray="2 2" opacity="0.4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Chain of Responsibility</div>
+            <div class="pattern-name-sub"><span class="en">Pass along a chain</span><span class="cn">责任链 / 沿链传递</span></div>
+            <p class="pattern-desc">
+              <span class="en">Passes requests along a chain of handlers. Each handler decides either to process the request or to pass it to the next handler in the chain.</span>
+              <span class="cn">将请求沿着处理者链传递。每个处理者决定是处理请求还是将其传递给链中的下一个处理者。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Command -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="12" y="12" width="40" height="40" rx="4"/>
+                <path d="M24 28l8 8-8 8" fill="currentColor" opacity="0.15"/>
+                <path d="M24 28l8 8-8 8"/>
+                <path d="M36 40h8"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Command</div>
+            <div class="pattern-name-sub"><span class="en">Request as object</span><span class="cn">命令 / 请求对象化</span></div>
+            <p class="pattern-desc">
+              <span class="en">Turns a request into a stand-alone object containing all information about the request. Supports undoable operations, queuing, and logging.</span>
+              <span class="cn">将请求转换为包含所有请求信息的独立对象。支持可撤销操作、排队和日志记录。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Iterator -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="24" width="12" height="16" rx="2" fill="currentColor" opacity="0.15"/>
+                <rect x="26" y="24" width="12" height="16" rx="2" fill="currentColor" opacity="0.15"/>
+                <rect x="44" y="24" width="12" height="16" rx="2" fill="currentColor" opacity="0.15"/>
+                <path d="M14 48l18-2 18 2"/>
+                <path d="M32 46v8"/>
+                <path d="M28 54l4 4 4-4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Iterator</div>
+            <div class="pattern-name-sub"><span class="en">Sequential access</span><span class="cn">迭代器 / 顺序访问</span></div>
+            <p class="pattern-desc">
+              <span class="en">Traverses elements of a collection without exposing its underlying representation (list, stack, tree, etc.).</span>
+              <span class="cn">在不暴露集合底层表现形式（列表、栈、树等）的情况下遍历集合中的所有元素。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Mediator -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="32" cy="32" r="8" fill="currentColor" opacity="0.2"/>
+                <circle cx="12" cy="16" r="5"/>
+                <circle cx="52" cy="16" r="5"/>
+                <circle cx="12" cy="48" r="5"/>
+                <circle cx="52" cy="48" r="5"/>
+                <path d="M16 20l12 8M48 20l-12 8M16 44l12-8M48 44l-12-8"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Mediator</div>
+            <div class="pattern-name-sub"><span class="en">Central communication hub</span><span class="cn">中介者 / 通信中枢</span></div>
+            <p class="pattern-desc">
+              <span class="en">Reduces chaotic dependencies between objects by restricting direct communications and forcing them to collaborate via a mediator object.</span>
+              <span class="cn">通过限制对象间的直接通信并强制它们通过中介者对象协作，减少对象间的混乱依赖。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Memento -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="16" y="12" width="32" height="40" rx="3"/>
+                <path d="M24 22h16M24 30h16M24 38h10"/>
+                <path d="M12 20l-4 4 4 4" opacity="0.5"/>
+                <path d="M8 24H4" opacity="0.5"/>
+                <circle cx="48" cy="46" r="8" fill="currentColor" opacity="0.15"/>
+                <path d="M46 46l2-3 2 3"/>
+                <path d="M48 43v6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Memento</div>
+            <div class="pattern-name-sub"><span class="en">Snapshot / Undo</span><span class="cn">备忘录 / 快照</span></div>
+            <p class="pattern-desc">
+              <span class="en">Saves and restores the previous state of an object without revealing the details of its implementation. Enables undo/redo functionality.</span>
+              <span class="cn">在不暴露对象实现细节的情况下保存和恢复对象之前的状态。支持撤销/重做功能。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Observer -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="32" cy="16" r="8"/>
+                <path d="M32 24v8"/>
+                <path d="M20 40h24" stroke-width="2"/>
+                <path d="M20 40v12M32 40v12M44 40v12"/>
+                <circle cx="20" cy="54" r="3" fill="currentColor" opacity="0.3"/>
+                <circle cx="32" cy="54" r="3" fill="currentColor" opacity="0.3"/>
+                <circle cx="44" cy="54" r="3" fill="currentColor" opacity="0.3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Observer</div>
+            <div class="pattern-name-sub"><span class="en">Event subscription</span><span class="cn">观察者 / 事件订阅</span></div>
+            <p class="pattern-desc">
+              <span class="en">Defines a subscription mechanism to notify multiple objects about any events that happen to the observed object.</span>
+              <span class="cn">定义一种订阅机制，以便在被观察对象发生事件时通知多个其他对象。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- State -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="16" cy="32" r="8"/>
+                <circle cx="48" cy="32" r="8"/>
+                <circle cx="32" cy="14" r="6" fill="currentColor" opacity="0.2"/>
+                <path d="M22 26l6-8M42 26l-6-8"/>
+                <path d="M24 32h16"/>
+                <path d="M36 28l4 4-4 4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">State</div>
+            <div class="pattern-name-sub"><span class="en">Object behavior changes with state</span><span class="cn">状态 / 行为随状态改变</span></div>
+            <p class="pattern-desc">
+              <span class="en">Lets an object alter its behavior when its internal state changes. It appears as if the object changed its class.</span>
+              <span class="cn">当对象的内部状态改变时改变其行为，看起来就像对象改变了其类。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Strategy -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="32" r="6"/>
+                <path d="M18 32h8"/>
+                <path d="M26 20l14 0" />
+                <path d="M26 32l14 0"/>
+                <path d="M26 44l14 0"/>
+                <path d="M26 20v24"/>
+                <rect x="40" y="14" width="16" height="12" rx="2" fill="currentColor" opacity="0.1"/>
+                <rect x="40" y="26" width="16" height="12" rx="2" fill="currentColor" opacity="0.2"/>
+                <rect x="40" y="38" width="16" height="12" rx="2" fill="currentColor" opacity="0.1"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Strategy</div>
+            <div class="pattern-name-sub"><span class="en">Interchangeable algorithms</span><span class="cn">策略 / 可互换算法</span></div>
+            <p class="pattern-desc">
+              <span class="en">Defines a family of algorithms, encapsulates each one, and makes them interchangeable. Strategy lets the algorithm vary independently from clients that use it.</span>
+              <span class="cn">定义一系列算法，将每个算法封装起来，并使它们可以互换。策略模式让算法独立于使用它的客户端而变化。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Template Method -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="12" y="8" width="40" height="48" rx="3"/>
+                <path d="M20 18h24"/>
+                <path d="M20 26h24" opacity="0.3"/>
+                <rect x="20" y="32" width="24" height="8" rx="2" stroke-dasharray="4 3"/>
+                <path d="M20 48h24" opacity="0.3"/>
+                <path d="M20 18h24" stroke-width="3"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Template Method</div>
+            <div class="pattern-name-sub"><span class="en">Algorithm skeleton</span><span class="cn">模板方法 / 算法骨架</span></div>
+            <p class="pattern-desc">
+              <span class="en">Defines the skeleton of an algorithm in a base class, letting subclasses override specific steps without changing the algorithm's overall structure.</span>
+              <span class="cn">在基类中定义算法的骨架，允许子类在不改变算法整体结构的情况下重写特定步骤。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+        <!-- Visitor -->
+        <div class="pattern-card fade-in">
+          <div class="pattern-card-top">
+            <div class="deco deco-1"></div><div class="deco deco-2"></div>
+            <div class="pattern-icon">
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="16" width="14" height="14" rx="2"/>
+                <rect x="8" y="36" width="14" height="14" rx="2"/>
+                <circle cx="48" cy="28" r="8"/>
+                <path d="M48 36v12"/>
+                <path d="M42 42h12"/>
+                <path d="M22 23h16M22 43h14" stroke-dasharray="3 2"/>
+              </svg>
+            </div>
+          </div>
+          <div class="pattern-card-body">
+            <div class="pattern-name">Visitor</div>
+            <div class="pattern-name-sub"><span class="en">Separate algorithms from objects</span><span class="cn">访问者 / 分离算法与对象</span></div>
+            <p class="pattern-desc">
+              <span class="en">Separates algorithms from the objects on which they operate, by moving each algorithm into a separate class called a visitor.</span>
+              <span class="cn">将算法与其所作用的对象分离，把每个算法移入称为"访问者"的独立类中。</span>
+            </p>
+            <span class="pattern-tag"><span class="en">Behavioral</span><span class="cn">行为型</span></span>
+          </div>
+          <button class="expand-btn" onclick="toggleExpand(this)"><span class="en">View Details</span><span class="cn">查看详情</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Relationships -->
+<section class="section" id="relationships">
+  <div class="section-inner">
+    <div class="section-header fade-in">
+      <span class="section-label"><span class="en">Object Relations</span><span class="cn">对象关系</span></span>
+      <h2 class="section-title">
+        <span class="en">Relationships Between Objects</span>
+        <span class="cn">对象之间的关系</span>
+      </h2>
+      <p class="section-desc">
+        <span class="en">From weakest to strongest coupling between classes and objects.</span>
+        <span class="cn">从最弱到最强的类和对象之间的耦合关系。</span>
+      </p>
+    </div>
+    <div class="rel-diagram fade-in">
+      <div class="rel-item">
+        <div class="rel-box" style="background:var(--gray-400)">
+          <span class="en">Dependency</span><span class="cn">依赖</span>
+        </div>
+        <span class="rel-label"><span class="en">Weakest</span><span class="cn">最弱</span></span>
+      </div>
+      <span class="rel-arrow">&rarr;</span>
+      <div class="rel-item">
+        <div class="rel-box" style="background:var(--gray-500)">
+          <span class="en">Association</span><span class="cn">关联</span>
+        </div>
+      </div>
+      <span class="rel-arrow">&rarr;</span>
+      <div class="rel-item">
+        <div class="rel-box" style="background:var(--blue)">
+          <span class="en">Aggregation</span><span class="cn">聚合</span>
+        </div>
+      </div>
+      <span class="rel-arrow">&rarr;</span>
+      <div class="rel-item">
+        <div class="rel-box" style="background:var(--orange)">
+          <span class="en">Composition</span><span class="cn">组合</span>
+        </div>
+      </div>
+      <span class="rel-arrow">&rarr;</span>
+      <div class="rel-item">
+        <div class="rel-box" style="background:var(--green)">
+          <span class="en">Inheritance</span><span class="cn">继承</span>
+        </div>
+        <span class="rel-label"><span class="en">Strongest</span><span class="cn">最强</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3><div class="diamond"></div> <span class="en">Design Patterns</span><span class="cn">设计模式</span></h3>
+        <p>
+          <span class="en">Based on "Dive Into Design Patterns" by Alexander Shvets. 22 classic GoF patterns explained with bilingual support.</span>
+          <span class="cn">基于亚历山大·什韦茨所著《深入设计模式》。以双语形式讲解 22 个经典 GoF 设计模式。</span>
+        </p>
+      </div>
+      <div class="footer-links">
+        <h4><span class="en">Categories</span><span class="cn">分类</span></h4>
+        <ul>
+          <li><a href="#creational"><span class="en">Creational Patterns</span><span class="cn">创建型模式</span></a></li>
+          <li><a href="#structural"><span class="en">Structural Patterns</span><span class="cn">结构型模式</span></a></li>
+          <li><a href="#behavioral"><span class="en">Behavioral Patterns</span><span class="cn">行为型模式</span></a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4><span class="en">Resources</span><span class="cn">资源</span></h4>
+        <ul>
+          <li><a href="https://refactoring.guru/design-patterns" target="_blank" rel="noopener">Refactoring.Guru (EN)</a></li>
+          <li><a href="https://refactoringguru.cn/design-patterns" target="_blank" rel="noopener">Refactoring.Guru (CN)</a></li>
+          <li><a href="#oop"><span class="en">OOP Basics</span><span class="cn">OOP 基础</span></a></li>
+          <li><a href="#solid"><span class="en">SOLID Principles</span><span class="cn">SOLID 原则</span></a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="en">A learning resource for the brainstorm project. Inspired by </span>
+      <span class="cn">brainstorm 项目学习资源。设计灵感来自 </span>
+      <a href="https://refactoring.guru" target="_blank" rel="noopener">Refactoring.Guru</a>
+    </div>
+  </div>
+</footer>
+
+<!-- Back to Top -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+  // ===== Language Toggle =====
+  function setLang(lang) {
+    document.documentElement.setAttribute('data-lang', lang);
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.l === lang);
+    });
+    localStorage.setItem('dp-lang', lang);
+  }
+
+  // Restore saved language
+  const savedLang = localStorage.getItem('dp-lang');
+  if (savedLang) setLang(savedLang);
+
+  // ===== Navbar scroll effect =====
+  const navbar = document.getElementById('navbar');
+  const backToTop = document.getElementById('backToTop');
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    navbar.classList.toggle('scrolled', scrollY > 50);
+    backToTop.classList.toggle('visible', scrollY > 600);
+
+    // Update TOC dots
+    const sections = ['hero', 'oop', 'solid', 'catalog'];
+    let current = 'hero';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.offsetTop - 200 <= scrollY) current = id;
+    });
+    document.querySelectorAll('.toc-dot').forEach(dot => {
+      dot.classList.toggle('active', dot.dataset.section === current);
+    });
+  });
+
+  // ===== TOC dot clicks =====
+  document.querySelectorAll('.toc-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      const target = document.getElementById(dot.dataset.section);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // ===== Mobile Nav =====
+  function toggleMobileNav() {
+    document.getElementById('mobileNav').classList.toggle('open');
+    document.getElementById('mobileOverlay').classList.toggle('open');
+  }
+
+  // ===== Pattern Filtering =====
+  function filterPatterns(cat) {
+    document.querySelectorAll('.catalog-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.cat === cat);
+    });
+    document.querySelectorAll('.category-section').forEach(section => {
+      if (cat === 'all') {
+        section.classList.add('visible');
+      } else {
+        section.classList.toggle('visible', section.dataset.category === cat);
+      }
+    });
+  }
+
+  // ===== Expand/Collapse Pattern Details =====
+  function toggleExpand(btn) {
+    const card = btn.closest('.pattern-card');
+    card.classList.toggle('expanded');
+    const isExpanded = card.classList.contains('expanded');
+    const lang = document.documentElement.getAttribute('data-lang');
+    const enSpan = btn.querySelector('.en');
+    const cnSpan = btn.querySelector('.cn');
+    if (enSpan) enSpan.textContent = isExpanded ? 'Hide Details' : 'View Details';
+    if (cnSpan) cnSpan.textContent = isExpanded ? '收起详情' : '查看详情';
+  }
+
+  // ===== Intersection Observer for fade-in =====
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
